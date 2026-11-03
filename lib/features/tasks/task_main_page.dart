@@ -53,19 +53,6 @@ class _TaskMainPageState extends State<TaskMainPage> {
           ),
         ],
       ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 72),
-        child: FloatingActionButton(
-          onPressed: () {
-            TaskDetailBottomSheet.show(context);
-          },
-          backgroundColor: LinearTheme.accent,
-          foregroundColor: Colors.white,
-          elevation: 4,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          child: const Icon(Icons.add, size: 26),
-        ),
-      ),
     );
   }
 

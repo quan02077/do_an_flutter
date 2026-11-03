@@ -277,12 +277,6 @@ class _TaskDetailBottomSheetState extends State<TaskDetailBottomSheet> {
                           label: _dueDate != null ? DateFormat('dd/MM/yyyy').format(_dueDate!) : 'Due date',
                           onTap: _showDatePicker,
                         ),
-                        const SizedBox(width: 8),
-                        _buildPropertyChip(
-                          icon: const Icon(Icons.view_in_ar_outlined, size: 14, color: LinearTheme.textSecondary),
-                          label: _project,
-                          onTap: _showProjectPicker,
-                        ),
                       ],
                     ),
                   ),

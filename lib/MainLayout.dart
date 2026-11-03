@@ -16,15 +16,18 @@ class _MainLayoutState extends State<MainLayout> {
   final List<Widget> pages = [
     const InboxPage(),
     const TaskPage(),
-    const Center(child: Text('Màn hình Projects & Teams', style: TextStyle(color: Colors.white, fontSize: 18))),
-    const Center(child: Text('Màn hình Others', style: TextStyle(color: Colors.white, fontSize: 18))),
+    const Center(
+      child: Text(
+        'Màn hình Projects & Teams',
+        style: TextStyle(color: Colors.white, fontSize: 18),
+      ),
+    ),
   ];
 
   final List<String> titles = [
     'Inbox',
     'Tasks',
     'Projects & Teams',
-    'Others',
   ];
 
   void switchTab(int index) {
@@ -105,23 +108,10 @@ class _MainLayoutState extends State<MainLayout> {
                     ),
                     _buildNavButton(
                       index: 2,
-                      icon: Icons.center_focus_weak,
-                    ),
-                    _buildNavButton(
-                      index: 3,
-                      icon: Icons.auto_awesome,
+                      icon: Icons.groups_outlined,
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(width: 14),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: const BoxDecoration(
-                  color: Color(0xFF1E1E1E),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.open_in_new, color: Colors.white, size: 26),
               ),
             ],
           ),

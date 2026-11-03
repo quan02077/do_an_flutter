@@ -193,27 +193,6 @@ class _KanbanBoardViewState extends State<KanbanBoardView> {
                         ),
                       ),
                     ),
-                    const Spacer(),
-                    GestureDetector(
-                      onTap: () {
-                        TaskDetailBottomSheet.show(
-                          context,
-                          task: TaskModel(
-                            id: '',
-                            title: '',
-                            status: status,
-                          ),
-                        );
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF22242B),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: const Icon(Icons.add, color: Colors.white70, size: 16),
-                      ),
-                    ),
                   ],
                 ),
               ),

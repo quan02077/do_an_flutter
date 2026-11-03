@@ -15,9 +15,6 @@ class TaskListView extends StatefulWidget {
 
 class _TaskListViewState extends State<TaskListView> {
   final TextEditingController _searchController = TextEditingController();
-  bool _isSearching = false;
-
-  final List<String> _tabs = ['Assigned', 'Created', 'Subscribed'];
 
   @override
   void dispose() {
@@ -35,97 +32,48 @@ class _TaskListViewState extends State<TaskListView> {
 
         return Column(
           children: [
-            Container(
-              height: 42,
-              padding: const EdgeInsets.symmetric(horizontal: 14),
-              child: Row(
-                children: [
-                  ..._tabs.map((tab) {
-                    final isSelected = provider.activeTabFilter == tab;
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: GestureDetector(
-                        onTap: () => provider.setActiveTabFilter(tab),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-                          decoration: BoxDecoration(
-                            color: isSelected ? const Color(0xFF26282E) : Colors.transparent,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                tab,
-                                style: TextStyle(
-                                  color: isSelected ? Colors.white : LinearTheme.textSecondary,
-                                  fontSize: 13.5,
-                                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                                ),
-                              ),
-                              if (tab == 'Assigned' && isSelected) ...[
-                                const SizedBox(width: 4),
-                                const Icon(Icons.filter_list, color: Colors.white, size: 14),
-                              ],
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  }),
-                  const Spacer(),
-                  GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _isSearching = !_isSearching;
-                        if (!_isSearching) {
-                          _searchController.clear();
-                          provider.setSearchQuery('');
-                        }
-                      });
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(7),
-                      decoration: BoxDecoration(
-                        color: _isSearching ? LinearTheme.surfaceRaised : Colors.transparent,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        _isSearching ? Icons.close : Icons.search,
-                        color: LinearTheme.textSecondary,
-                        size: 19,
-                      ),
-                    ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              child: TextField(
+                controller: _searchController,
+                style: const TextStyle(color: Colors.white, fontSize: 13.5),
+                decoration: InputDecoration(
+                  hintText: 'Tìm kiếm issue theo tên, mã (LIN-...), mô tả...',
+                  hintStyle: const TextStyle(color: LinearTheme.textMuted, fontSize: 13),
+                  prefixIcon: const Icon(Icons.search, color: LinearTheme.textSecondary, size: 18),
+                  suffixIcon: _searchController.text.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear, color: LinearTheme.textSecondary, size: 18),
+                          onPressed: () {
+                            setState(() {
+                              _searchController.clear();
+                              provider.setSearchQuery('');
+                            });
+                          },
+                        )
+                      : null,
+                  filled: true,
+                  fillColor: LinearTheme.surface,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: LinearTheme.surfaceBorder),
                   ),
-                ],
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: LinearTheme.surfaceBorder),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: LinearTheme.accent.withValues(alpha: 0.6)),
+                  ),
+                ),
+                onChanged: (val) {
+                  setState(() {});
+                  provider.setSearchQuery(val);
+                },
               ),
             ),
-            if (_isSearching)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                child: TextField(
-                  controller: _searchController,
-                  autofocus: true,
-                  style: const TextStyle(color: Colors.white, fontSize: 13.5),
-                  decoration: InputDecoration(
-                    hintText: 'Tìm kiếm issue theo tên, mã (LIN-...), mô tả...',
-                    hintStyle: const TextStyle(color: LinearTheme.textMuted, fontSize: 13),
-                    prefixIcon: const Icon(Icons.search, color: LinearTheme.textSecondary, size: 18),
-                    filled: true,
-                    fillColor: LinearTheme.surface,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: LinearTheme.surfaceBorder),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: LinearTheme.surfaceBorder),
-                    ),
-                  ),
-                  onChanged: (val) => provider.setSearchQuery(val),
-                ),
-              ),
             Container(
               height: 36,
               margin: const EdgeInsets.only(top: 4, bottom: 6),
