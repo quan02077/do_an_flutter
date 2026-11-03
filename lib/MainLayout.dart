@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:do_an_flutter/Home/task.dart';
 import 'package:do_an_flutter/Home/inbox.dart';
+import 'package:do_an_flutter/Settings/settings_page.dart';
 
 class MainLayout extends StatefulWidget {
   const MainLayout({super.key});
@@ -18,7 +19,8 @@ class _MainLayoutState extends State<MainLayout> {
     const InboxPage(),
     const TaskPage(),
     const Center(child: Text('Màn hình Projects & Teams', style: TextStyle(color: Colors.white, fontSize: 18))),
-    const Center(child: Text('Màn hình Others', style: TextStyle(color: Colors.white, fontSize: 18))),
+    // const Center(child: Text('Màn hình Others', style: TextStyle(color: Colors.white, fontSize: 18))),
+    const SettingsPage(),
   ];
 
   // Danh sách tiêu đề tương ứng với từng tab
@@ -26,7 +28,7 @@ class _MainLayoutState extends State<MainLayout> {
     'Inbox',
     'Tasks',
     'Projects & Teams',
-    'Others',
+    'Settings',
   ];
 
   // 3. Hàm chuyển tab khi bấm vào từng icon
@@ -48,7 +50,7 @@ class _MainLayoutState extends State<MainLayout> {
           style: const TextStyle(
             fontFamily: 'MyCustomFont',
             fontWeight: FontWeight.bold,
-            fontSize: 50,
+            fontSize: 26,
           ),
         ),
         actions: [
