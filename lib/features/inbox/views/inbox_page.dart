@@ -6,43 +6,59 @@ class InboxPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: LinearTheme.background,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: const BoxDecoration(
-                color: LinearTheme.surface,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.inbox_outlined,
-                size: 48,
-                color: LinearTheme.textSecondary,
-              ),
+    return Container(
+      color: LinearTheme.background,
+      child: Column(
+        children: [
+          const SizedBox(height: 12),
+          ListTile(
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 20,
+              vertical: 4,
             ),
-            const SizedBox(height: 16),
-            const Text(
-              'Hộp thư thông báo',
-              style: TextStyle(
+            leading: const CircleAvatar(
+              radius: 22,
+              backgroundColor: Color(0xFF252525),
+              child: Icon(
+                Icons.layers_outlined,
                 color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
+                size: 24,
               ),
             ),
-            const SizedBox(height: 8),
-            const Text(
-              'Tất cả thông báo và cập nhật mới sẽ hiển thị tại đây',
-              style: TextStyle(
-                color: LinearTheme.textMuted,
-                fontSize: 13,
+            title: const Row(
+              children: [
+                CircleAvatar(
+                  radius: 4,
+                  backgroundColor: LinearTheme.accent,
+                ),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Welcome to your workspace',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            subtitle: const Padding(
+              padding: EdgeInsets.only(left: 16, top: 5),
+              child: Text(
+                'Chào mừng bạn đến với không gian làm việc nhóm · Vừa xong',
+                style: TextStyle(
+                  color: LinearTheme.textSecondary,
+                  fontSize: 12,
+                ),
               ),
             ),
-          ],
-        ),
+            onTap: () {},
+          ),
+        ],
       ),
     );
   }

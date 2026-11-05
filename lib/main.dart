@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'core/services/supabase_service.dart';
 import 'core/theme/linear_theme.dart';
+import 'core/theme/app_theme.dart';
 import 'core/layout/main_layout.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Khởi tạo kết nối Supabase tập trung
   await SupabaseService.initialize();
 
   runApp(const LinearApp());
@@ -19,7 +21,7 @@ class LinearApp extends StatelessWidget {
     return MaterialApp(
       title: 'Linear Task Manager',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData.dark().copyWith(
+      theme: AppTheme.darkTheme.copyWith(
         scaffoldBackgroundColor: LinearTheme.background,
         colorScheme: const ColorScheme.dark(
           primary: LinearTheme.accent,
