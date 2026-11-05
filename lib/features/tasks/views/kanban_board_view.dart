@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/task_model.dart';
 import '../state/task_provider.dart';
-import '../theme/linear_theme.dart';
+import '../../../core/theme/linear_theme.dart';
 import '../widgets/task_item_tile.dart';
 import 'task_detail_bottom_sheet.dart';
 

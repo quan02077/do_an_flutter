@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/task_model.dart';
+import 'package:do_an_flutter/features/tasks/models/task_model.dart';
 
 class LinearTheme {
   static const Color background = Color(0xFF08090A);

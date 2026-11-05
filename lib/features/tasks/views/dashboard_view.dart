@@ -2,7 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import '../models/task_model.dart';
 import '../state/task_provider.dart';
-import '../theme/linear_theme.dart';
+import '../../../core/theme/linear_theme.dart';
 
 class DashboardView extends StatelessWidget {
   const DashboardView({super.key});

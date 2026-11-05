@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../theme/linear_theme.dart';
+import '../../../core/theme/linear_theme.dart';
 
 class LinearEmptyState extends StatelessWidget {
   final String title;

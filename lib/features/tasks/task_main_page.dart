@@ -4,7 +4,7 @@ import 'views/dashboard_view.dart';
 import 'views/kanban_board_view.dart';
 import 'views/task_detail_bottom_sheet.dart';
 import 'views/task_list_view.dart';
-import 'theme/linear_theme.dart';
+import '../../core/theme/linear_theme.dart';
 
 enum TaskSubView {
   list,
