@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
@@ -51,7 +50,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             const SizedBox(height: 40),
 
             const Text(
-              'Forgot password?',
+              'Quên mật khẩu?',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 28,
@@ -62,7 +61,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             const SizedBox(height: 12),
 
             const Text(
-              'Enter your email to reset your password',
+              'Nhập email để đặt lại mật khẩu của bạn',
               style: TextStyle(color: Colors.grey),
             ),
 
@@ -73,7 +72,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
               keyboardType: TextInputType.emailAddress,
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
-                hintText: 'Email address',
+                hintText: 'Địa chỉ email',
                 hintStyle: const TextStyle(color: Colors.grey),
                 prefixIcon: const Icon(Icons.email_outlined),
                 filled: true,
@@ -95,7 +94,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   backgroundColor: Colors.white,
                   foregroundColor: Colors.black,
                 ),
-                child: const Text('Send request'),
+                child: const Text('Gửi yêu cầu'),
               ),
             ),
           ],

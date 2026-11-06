@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:do_an_flutter/features/auth/views/register_page.dart';
 import 'package:do_an_flutter/features/auth/views/forgot_password_page.dart';
@@ -57,7 +56,7 @@ class _LoginPageState extends State<LoginPage> {
             const SizedBox(height: 50),
 
             const Text(
-              'Welcome back',
+              'Chào mừng trở lại',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 28,
@@ -68,7 +67,7 @@ class _LoginPageState extends State<LoginPage> {
             const SizedBox(height: 10),
 
             const Text(
-              'Log in to your account',
+              'Đăng nhập vào tài khoản của bạn',
               style: TextStyle(color: Colors.grey),
             ),
 
@@ -97,7 +96,7 @@ class _LoginPageState extends State<LoginPage> {
               obscureText: !hienMatKhau,
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
-                hintText: 'Password',
+                hintText: 'Mật khẩu',
                 hintStyle: const TextStyle(color: Colors.grey),
                 prefixIcon: const Icon(Icons.lock_outline),
                 suffixIcon: IconButton(
@@ -133,7 +132,7 @@ class _LoginPageState extends State<LoginPage> {
                   );
                 },
                 child: const Text(
-                  'Forgot password?',
+                  'Quên mật khẩu?',
                   style: TextStyle(color: Colors.white70),
                 ),
               ),
@@ -150,7 +149,7 @@ class _LoginPageState extends State<LoginPage> {
                   backgroundColor: Colors.white,
                   foregroundColor: Colors.black,
                 ),
-                child: const Text('Log in'),
+                child: const Text('Đăng nhập'),
               ),
             ),
 
@@ -160,7 +159,7 @@ class _LoginPageState extends State<LoginPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Text(
-                  "Don't have an account?",
+                  "Chưa có tài khoản?",
                   style: TextStyle(color: Colors.grey),
                 ),
                 TextButton(
@@ -174,7 +173,7 @@ class _LoginPageState extends State<LoginPage> {
                     );
                   },
                   child: const Text(
-                    'Sign up',
+                    'Đăng ký ngay',
                     style: TextStyle(color: Colors.white),
                   ),
                 ),

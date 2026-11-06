@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -9,7 +8,7 @@ class ProfilePage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text('My Profile'),
+        title: const Text('Hồ sơ cá nhân'),
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
       ),
@@ -25,7 +24,7 @@ class ProfilePage extends StatelessWidget {
           SizedBox(height: 15),
           Center(
             child: Text(
-              'User',
+              'Người dùng',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 22,
@@ -45,14 +44,14 @@ class ProfilePage extends StatelessWidget {
           ListTile(
             leading: Icon(Icons.person_outline, color: Colors.white),
             title: Text(
-              'Personal information',
+              'Thông tin cá nhân',
               style: TextStyle(color: Colors.white),
             ),
           ),
           ListTile(
             leading: Icon(Icons.lock_outline, color: Colors.white),
             title: Text(
-              'Change password',
+              'Đổi mật khẩu',
               style: TextStyle(color: Colors.white),
             ),
           ),

@@ -7,7 +7,7 @@ class LinearEmptyState extends StatelessWidget {
 
   const LinearEmptyState({
     super.key,
-    this.title = 'No issues assigned to you',
+    this.title = 'Chưa có công việc nào được phân công',
     this.subtitle,
   });
 

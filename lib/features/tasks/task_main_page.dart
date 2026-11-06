@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'views/calendar_view.dart';
 import 'views/dashboard_view.dart';
 import 'views/kanban_board_view.dart';
-import 'views/task_detail_bottom_sheet.dart';
 import 'views/task_list_view.dart';
 import '../../core/theme/linear_theme.dart';
 
@@ -29,25 +28,28 @@ class _TaskMainPageState extends State<TaskMainPage> {
       backgroundColor: LinearTheme.background,
       body: Column(
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+          // Sub-view Switcher (Gọn nhẹ, thanh lịch chuẩn Linear)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             child: Container(
-              padding: const EdgeInsets.all(3),
+              height: 36,
+              padding: const EdgeInsets.all(2.5),
               decoration: BoxDecoration(
-                color: const Color(0xFF16171B),
-                borderRadius: BorderRadius.circular(24),
+                color: LinearTheme.surface,
+                borderRadius: BorderRadius.circular(10),
                 border: Border.all(color: LinearTheme.surfaceBorder, width: 0.8),
               ),
               child: Row(
                 children: [
-                  _buildSubViewTab(TaskSubView.list, 'List', Icons.format_list_bulleted_rounded),
-                  _buildSubViewTab(TaskSubView.kanban, 'Kanban', Icons.view_kanban_outlined),
-                  _buildSubViewTab(TaskSubView.calendar, 'Calendar', Icons.calendar_month_outlined),
-                  _buildSubViewTab(TaskSubView.dashboard, 'Stats', Icons.analytics_outlined),
+                  _buildTab(TaskSubView.list, 'Danh sách', Icons.format_list_bulleted_rounded),
+                  _buildTab(TaskSubView.kanban, 'Bảng Kanban', Icons.view_kanban_outlined),
+                  _buildTab(TaskSubView.calendar, 'Lịch', Icons.calendar_today_outlined),
+                  _buildTab(TaskSubView.dashboard, 'Thống kê', Icons.insights_rounded),
                 ],
               ),
             ),
           ),
+          const SizedBox(height: 4),
           Expanded(
             child: _buildCurrentView(),
           ),
@@ -56,37 +58,40 @@ class _TaskMainPageState extends State<TaskMainPage> {
     );
   }
 
-  Widget _buildSubViewTab(TaskSubView view, String title, IconData icon) {
+  Widget _buildTab(TaskSubView view, String title, IconData icon) {
     final isSelected = _currentSubView == view;
 
     return Expanded(
       child: GestureDetector(
         onTap: () {
-          setState(() {
-            _currentSubView = view;
-          });
+          if (_currentSubView != view) {
+            setState(() => _currentSubView = view);
+          }
         },
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 7),
+        behavior: HitTestBehavior.opaque,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFF26282E) : Colors.transparent,
-            borderRadius: BorderRadius.circular(20),
+            color: isSelected ? LinearTheme.surfaceHighlight : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
                 icon,
-                size: 15,
+                size: 13,
                 color: isSelected ? Colors.white : LinearTheme.textSecondary,
               ),
-              const SizedBox(width: 5),
+              const SizedBox(width: 4),
               Text(
                 title,
                 style: TextStyle(
                   color: isSelected ? Colors.white : LinearTheme.textSecondary,
-                  fontSize: 12,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                  fontSize: 11,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                 ),
               ),
             ],

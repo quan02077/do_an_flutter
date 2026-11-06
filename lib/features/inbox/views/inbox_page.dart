@@ -34,7 +34,7 @@ class InboxPage extends StatelessWidget {
                 SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Welcome to your workspace',
+                    'Chào mừng đến với không gian làm việc',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(

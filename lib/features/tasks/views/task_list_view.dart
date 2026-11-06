@@ -32,56 +32,69 @@ class _TaskListViewState extends State<TaskListView> {
 
         return Column(
           children: [
+            // Thanh công cụ: Tìm kiếm & Lọc trạng thái (Tối giản)
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-              child: TextField(
-                controller: _searchController,
-                style: const TextStyle(color: Colors.white, fontSize: 13.5),
-                decoration: InputDecoration(
-                  hintText: 'Tìm kiếm issue theo tên, mã (LIN-...), mô tả...',
-                  hintStyle: const TextStyle(color: LinearTheme.textMuted, fontSize: 13),
-                  prefixIcon: const Icon(Icons.search, color: LinearTheme.textSecondary, size: 18),
-                  suffixIcon: _searchController.text.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.clear, color: LinearTheme.textSecondary, size: 18),
-                          onPressed: () {
-                            setState(() {
-                              _searchController.clear();
-                              provider.setSearchQuery('');
-                            });
-                          },
-                        )
-                      : null,
-                  filled: true,
-                  fillColor: LinearTheme.surface,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: const BorderSide(color: LinearTheme.surfaceBorder),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              child: Row(
+                children: [
+                  // Ô tìm kiếm co giãn mượt mà
+                  Expanded(
+                    child: SizedBox(
+                      height: 34,
+                      child: TextField(
+                        controller: _searchController,
+                        style: const TextStyle(color: Colors.white, fontSize: 13),
+                        decoration: InputDecoration(
+                          hintText: 'Tìm kiếm công việc...',
+                          hintStyle: const TextStyle(color: LinearTheme.textMuted, fontSize: 12.5),
+                          prefixIcon: const Icon(Icons.search, color: LinearTheme.textSecondary, size: 16),
+                          suffixIcon: _searchController.text.isNotEmpty
+                              ? IconButton(
+                                  padding: EdgeInsets.zero,
+                                  icon: const Icon(Icons.clear, color: LinearTheme.textSecondary, size: 15),
+                                  onPressed: () {
+                                    _searchController.clear();
+                                    provider.setSearchQuery('');
+                                    setState(() {});
+                                  },
+                                )
+                              : null,
+                          filled: true,
+                          fillColor: LinearTheme.surface,
+                          contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 10),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: const BorderSide(color: LinearTheme.surfaceBorder, width: 0.8),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: const BorderSide(color: LinearTheme.surfaceBorder, width: 0.8),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: const BorderSide(color: LinearTheme.accent, width: 1),
+                          ),
+                        ),
+                        onChanged: (val) {
+                          setState(() {});
+                          provider.setSearchQuery(val);
+                        },
+                      ),
+                    ),
                   ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: const BorderSide(color: LinearTheme.surfaceBorder),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color: LinearTheme.accent.withValues(alpha: 0.6)),
-                  ),
-                ),
-                onChanged: (val) {
-                  setState(() {});
-                  provider.setSearchQuery(val);
-                },
+                ],
               ),
             ),
+
+            // Dải lọc trạng thái (Status Chips) cuộn ngang nhẹ nhàng
             Container(
-              height: 36,
-              margin: const EdgeInsets.only(top: 4, bottom: 6),
+              height: 28,
+              margin: const EdgeInsets.symmetric(vertical: 6),
               child: ListView(
                 scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 14),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 children: [
-                  _buildStatusChip(
+                  _buildFilterChip(
                     label: 'Tất cả (${provider.tasks.length})',
                     isSelected: provider.selectedStatusFilter == null,
                     onTap: () => provider.setStatusFilter(null),
@@ -91,8 +104,8 @@ class _TaskListViewState extends State<TaskListView> {
                     final count = provider.getTasksByStatus(status).length;
                     return Padding(
                       padding: const EdgeInsets.only(right: 6),
-                      child: _buildStatusChip(
-                        icon: LinearTheme.buildStatusIcon(status, size: 12),
+                      child: _buildFilterChip(
+                        icon: LinearTheme.buildStatusIcon(status, size: 11),
                         label: '${LinearTheme.getStatusLabel(status)} ($count)',
                         isSelected: provider.selectedStatusFilter == status,
                         onTap: () => provider.setStatusFilter(
@@ -104,18 +117,20 @@ class _TaskListViewState extends State<TaskListView> {
                 ],
               ),
             ),
+
+            const SizedBox(height: 2),
+
+            // Danh sách Task
             Expanded(
               child: tasks.isEmpty
                   ? LinearEmptyState(
-                      title: provider.activeTabFilter == 'Assigned'
-                          ? 'No issues assigned to you'
-                          : 'No issues in ${provider.activeTabFilter}',
+                      title: 'Chưa có công việc nào',
                       subtitle: provider.searchQuery.isNotEmpty
                           ? 'Không tìm thấy kết quả phù hợp với từ khóa'
-                          : 'Tất cả công việc đã được xử lý hoặc chưa được phân công',
+                          : 'Bấm dấu + ở góc dưới để tạo công việc đầu tiên',
                     )
                   : ListView.builder(
-                      padding: const EdgeInsets.only(top: 4, bottom: 80),
+                      padding: const EdgeInsets.only(top: 2, bottom: 90),
                       itemCount: tasks.length,
                       itemBuilder: (context, index) {
                         final task = tasks[index];
@@ -125,11 +140,45 @@ class _TaskListViewState extends State<TaskListView> {
                           background: Container(
                             alignment: Alignment.centerRight,
                             padding: const EdgeInsets.only(right: 20),
-                            color: LinearTheme.priorityUrgent.withValues(alpha: 0.2),
-                            child: const Icon(Icons.delete_outline, color: LinearTheme.priorityUrgent),
+                            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 3.5),
+                            decoration: BoxDecoration(
+                              color: LinearTheme.priorityUrgent.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'Xoá',
+                                  style: TextStyle(
+                                    color: LinearTheme.priorityUrgent,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                SizedBox(width: 6),
+                                Icon(Icons.delete_outline, color: LinearTheme.priorityUrgent, size: 18),
+                              ],
+                            ),
                           ),
                           onDismissed: (_) {
+                            final deletedTask = task;
                             provider.deleteTask(task.id);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Đã xoá ${deletedTask.displayCode}'),
+                                backgroundColor: const Color(0xFF1E2025),
+                                behavior: SnackBarBehavior.floating,
+                                duration: const Duration(seconds: 4),
+                                action: SnackBarAction(
+                                  label: 'Hoàn tác',
+                                  textColor: LinearTheme.accentLight,
+                                  onPressed: () {
+                                    provider.addTask(deletedTask);
+                                  },
+                                ),
+                              ),
+                            );
                           },
                           child: TaskItemTile(
                             task: task,
@@ -150,7 +199,7 @@ class _TaskListViewState extends State<TaskListView> {
     );
   }
 
-  Widget _buildStatusChip({
+  Widget _buildFilterChip({
     Widget? icon,
     required String label,
     required bool isSelected,
@@ -158,10 +207,12 @@ class _TaskListViewState extends State<TaskListView> {
   }) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF2E313A) : const Color(0xFF141518),
+          color: isSelected ? LinearTheme.surfaceHighlight : LinearTheme.surface,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: isSelected ? LinearTheme.accent : LinearTheme.surfaceBorder,
@@ -173,13 +224,13 @@ class _TaskListViewState extends State<TaskListView> {
           children: [
             if (icon != null) ...[
               icon,
-              const SizedBox(width: 5),
+              const SizedBox(width: 4),
             ],
             Text(
               label,
               style: TextStyle(
                 color: isSelected ? Colors.white : LinearTheme.textSecondary,
-                fontSize: 12,
+                fontSize: 11,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
               ),
             ),

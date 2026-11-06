@@ -13,7 +13,7 @@ class KanbanBoardView extends StatefulWidget {
 }
 
 class _KanbanBoardViewState extends State<KanbanBoardView> {
-  final PageController _pageController = PageController(viewportFraction: 0.86);
+  final PageController _pageController = PageController(viewportFraction: 0.88);
   int _activeColumnIndex = 0;
 
   final List<TaskStatus> _columns = [
@@ -38,13 +38,14 @@ class _KanbanBoardViewState extends State<KanbanBoardView> {
 
         return Column(
           children: [
+            // Thanh chuyển cột trạng thái (gọn nhẹ)
             Container(
-              height: 40,
-              margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              height: 32,
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 itemCount: _columns.length,
-                separatorBuilder: (_, _) => const SizedBox(width: 8),
+                separatorBuilder: (_, _) => const SizedBox(width: 6),
                 itemBuilder: (context, index) {
                   final status = _columns[index];
                   final isCurrent = _activeColumnIndex == index;
@@ -55,47 +56,42 @@ class _KanbanBoardViewState extends State<KanbanBoardView> {
                       setState(() => _activeColumnIndex = index);
                       _pageController.animateToPage(
                         index,
-                        duration: const Duration(milliseconds: 300),
+                        duration: const Duration(milliseconds: 250),
                         curve: Curves.easeInOut,
                       );
                     },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    behavior: HitTestBehavior.opaque,
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 150),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        color: isCurrent ? const Color(0xFF26282F) : LinearTheme.surface,
-                        borderRadius: BorderRadius.circular(18),
+                        color: isCurrent ? LinearTheme.surfaceHighlight : LinearTheme.surface,
+                        borderRadius: BorderRadius.circular(14),
                         border: Border.all(
                           color: isCurrent ? LinearTheme.accent : LinearTheme.surfaceBorder,
-                          width: 1,
+                          width: 0.8,
                         ),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          LinearTheme.buildStatusIcon(status, size: 13),
-                          const SizedBox(width: 6),
+                          LinearTheme.buildStatusIcon(status, size: 12),
+                          const SizedBox(width: 5),
                           Text(
                             LinearTheme.getStatusLabel(status),
                             style: TextStyle(
                               color: isCurrent ? Colors.white : LinearTheme.textSecondary,
-                              fontSize: 12.5,
+                              fontSize: 11.5,
                               fontWeight: isCurrent ? FontWeight.w600 : FontWeight.normal,
                             ),
                           ),
-                          const SizedBox(width: 6),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-                            decoration: BoxDecoration(
-                              color: isCurrent ? LinearTheme.accent.withValues(alpha: 0.3) : const Color(0xFF202227),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Text(
-                              '$count',
-                              style: TextStyle(
-                                color: isCurrent ? Colors.white : LinearTheme.textMuted,
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                              ),
+                          const SizedBox(width: 5),
+                          Text(
+                            '$count',
+                            style: TextStyle(
+                              color: isCurrent ? Colors.white70 : LinearTheme.textMuted,
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ],
@@ -105,6 +101,10 @@ class _KanbanBoardViewState extends State<KanbanBoardView> {
                 },
               ),
             ),
+
+            const SizedBox(height: 2),
+
+            // Các cột Kanban (vuốt ngang bằng PageView)
             Expanded(
               child: PageView.builder(
                 controller: _pageController,
@@ -134,8 +134,8 @@ class _KanbanBoardViewState extends State<KanbanBoardView> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Đã chuyển "${details.data.id}" sang ${LinearTheme.getStatusLabel(status)}',
-              style: const TextStyle(color: Colors.white),
+              'Đã chuyển ${details.data.displayCode} sang ${LinearTheme.getStatusLabel(status)}',
+              style: const TextStyle(color: Colors.white, fontSize: 13),
             ),
             backgroundColor: const Color(0xFF1E2025),
             duration: const Duration(seconds: 2),
@@ -147,10 +147,10 @@ class _KanbanBoardViewState extends State<KanbanBoardView> {
         final isDropTarget = candidateData.isNotEmpty;
 
         return Container(
-          margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+          margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 4),
           decoration: BoxDecoration(
-            color: isDropTarget ? const Color(0xFF1C1E26) : const Color(0xFF101115),
-            borderRadius: BorderRadius.circular(14),
+            color: isDropTarget ? const Color(0xFF1A1C22) : const Color(0xFF0F1013),
+            borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: isDropTarget ? LinearTheme.accent : LinearTheme.surfaceBorder,
               width: isDropTarget ? 1.5 : 0.8,
@@ -158,8 +158,9 @@ class _KanbanBoardViewState extends State<KanbanBoardView> {
           ),
           child: Column(
             children: [
+              // Column Header
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 decoration: const BoxDecoration(
                   border: Border(
                     bottom: BorderSide(color: LinearTheme.surfaceBorder, width: 0.8),
@@ -167,28 +168,28 @@ class _KanbanBoardViewState extends State<KanbanBoardView> {
                 ),
                 child: Row(
                   children: [
-                    LinearTheme.buildStatusIcon(status, size: 16),
+                    LinearTheme.buildStatusIcon(status, size: 14),
                     const SizedBox(width: 8),
                     Text(
                       LinearTheme.getStatusLabel(status),
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 14.5,
+                        fontSize: 13.5,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                     const SizedBox(width: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF22242B),
-                        borderRadius: BorderRadius.circular(10),
+                        color: LinearTheme.surfaceRaised,
+                        borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
                         '${tasks.length}',
                         style: const TextStyle(
                           color: LinearTheme.textSecondary,
-                          fontSize: 11,
+                          fontSize: 10.5,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -196,32 +197,34 @@ class _KanbanBoardViewState extends State<KanbanBoardView> {
                   ],
                 ),
               ),
+
+              // Danh sách Task trong cột
               Expanded(
                 child: tasks.isEmpty
                     ? Center(
                         child: Text(
-                          'Kéo thả task vào đây\nhoặc bấm + để tạo mới',
-                          textAlign: TextAlign.center,
+                          'Kéo thả công việc vào đây',
                           style: TextStyle(
                             color: isDropTarget ? LinearTheme.accentLight : LinearTheme.textMuted,
-                            fontSize: 12.5,
+                            fontSize: 12,
                           ),
                         ),
                       )
                     : ListView.builder(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        padding: const EdgeInsets.only(top: 6, bottom: 90),
                         itemCount: tasks.length,
                         itemBuilder: (context, index) {
                           final task = tasks[index];
 
                           return LongPressDraggable<TaskModel>(
                             data: task,
+                            delay: const Duration(milliseconds: 200),
                             feedback: Material(
                               color: Colors.transparent,
                               child: SizedBox(
-                                width: MediaQuery.of(context).size.width * 0.78,
+                                width: MediaQuery.of(context).size.width * 0.82,
                                 child: Opacity(
-                                  opacity: 0.9,
+                                  opacity: 0.92,
                                   child: TaskItemTile(
                                     task: task,
                                     onTap: () {},
@@ -230,7 +233,7 @@ class _KanbanBoardViewState extends State<KanbanBoardView> {
                               ),
                             ),
                             childWhenDragging: Opacity(
-                              opacity: 0.25,
+                              opacity: 0.2,
                               child: TaskItemTile(
                                 task: task,
                                 onTap: () {},

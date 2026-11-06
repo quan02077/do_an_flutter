@@ -1,7 +1,7 @@
-
 import 'package:flutter/material.dart';
 import 'package:do_an_flutter/features/settings/views/profile_page.dart';
 import 'package:do_an_flutter/features/auth/views/login_page.dart';
+
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
@@ -9,17 +9,16 @@ class SettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView(
       children: [
-
         ListTile(
           leading: const CircleAvatar(
             child: Icon(Icons.person),
           ),
           title: const Text(
-            'My Profile',
+            'Hồ sơ cá nhân',
             style: TextStyle(color: Colors.white),
           ),
           subtitle: const Text(
-            'View your profile',
+            'Xem và chỉnh sửa thông tin',
             style: TextStyle(color: Colors.grey),
           ),
           trailing: const Icon(
@@ -36,7 +35,6 @@ class SettingsPage extends StatelessWidget {
           },
         ),
 
-
         const Divider(color: Colors.white24),
         ListTile(
           leading: const Icon(
@@ -44,7 +42,7 @@ class SettingsPage extends StatelessWidget {
             color: Colors.white,
           ),
           title: const Text(
-            'Log in',
+            'Đăng nhập',
             style: TextStyle(color: Colors.white),
           ),
           onTap: () {
@@ -63,7 +61,7 @@ class SettingsPage extends StatelessWidget {
             color: Colors.white,
           ),
           title: Text(
-            'Notifications',
+            'Thông báo',
             style: TextStyle(color: Colors.white),
           ),
           trailing: Icon(
@@ -78,7 +76,7 @@ class SettingsPage extends StatelessWidget {
             color: Colors.white,
           ),
           title: Text(
-            'Appearance',
+            'Giao diện',
             style: TextStyle(color: Colors.white),
           ),
           trailing: Icon(
@@ -93,7 +91,7 @@ class SettingsPage extends StatelessWidget {
             color: Colors.white,
           ),
           title: Text(
-            'Privacy',
+            'Bảo mật & Quyền riêng tư',
             style: TextStyle(color: Colors.white),
           ),
           trailing: Icon(
@@ -110,7 +108,7 @@ class SettingsPage extends StatelessWidget {
             color: Colors.redAccent,
           ),
           title: const Text(
-            'Log out',
+            'Đăng xuất',
             style: TextStyle(color: Colors.redAccent),
           ),
           onTap: () {},

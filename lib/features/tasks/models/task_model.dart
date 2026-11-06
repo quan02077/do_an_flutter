@@ -28,6 +28,7 @@ class TaskModel {
   List<String> labels;
   DateTime? dueDate;
   final DateTime createdAt;
+
   TaskModel({
     required this.id,
     this.code,
@@ -46,9 +47,9 @@ class TaskModel {
 
   String get displayCode {
     if (code != null && code!.isNotEmpty) return code!;
-    if (id.startsWith('TASK-')) return id;
-    if (id.length >= 6) return 'TASK-${id.substring(0, 4).toUpperCase()}';
-    return id.isNotEmpty ? 'TASK-$id' : 'TASK-NEW';
+    if (id.startsWith('LIN-') || id.startsWith('TASK-')) return id;
+    if (id.length >= 6) return 'LIN-${id.substring(0, 4).toUpperCase()}';
+    return id.isNotEmpty ? 'LIN-$id' : 'LIN-NEW';
   }
 
   TaskModel copyWith({
@@ -102,61 +103,70 @@ class TaskModel {
       }
     }
 
-    List<String> labelList = [];
-    if (json['labels'] != null) {
-      labelList = List<String>.from(json['labels']);
-    }
-
-    DateTime? taskDueDate;
+    DateTime? parsedDueDate;
     if (json['due_date'] != null) {
-      taskDueDate = DateTime.tryParse(json['due_date'].toString());
+      parsedDueDate = DateTime.tryParse(json['due_date'].toString());
     }
 
-    DateTime taskCreatedAt = DateTime.now();
+    DateTime? parsedCreatedAt;
     if (json['created_at'] != null) {
-      taskCreatedAt = DateTime.tryParse(json['created_at'].toString()) ?? DateTime.now();
+      parsedCreatedAt = DateTime.tryParse(json['created_at'].toString());
     }
 
-    String? resolvedAssignee = json['assignee_name'] as String?;
-    if (resolvedAssignee == null && json['users'] != null) {
-      resolvedAssignee = json['users']['full_name'] as String?;
+    List<String> parsedLabels = [];
+    if (json['labels'] != null) {
+      if (json['labels'] is List) {
+        parsedLabels = (json['labels'] as List).map((e) => e.toString()).toList();
+      }
     }
 
-    String? resolvedProject = json['project_name'] as String?;
-    if (resolvedProject == null && json['projects'] != null) {
-      resolvedProject = json['projects']['name'] as String?;
+    String userName = 'Nguyen Nhat Minh Quan';
+    if (json['users'] != null && json['users'] is Map) {
+      userName = json['users']['name'] ?? json['users']['email'] ?? userName;
+    } else if (json['assignee'] != null) {
+      userName = json['assignee'].toString();
+    }
+
+    String projName = 'Lam do an flutter';
+    if (json['projects'] != null && json['projects'] is Map) {
+      projName = json['projects']['name'] ?? projName;
+    } else if (json['project'] != null) {
+      projName = json['project'].toString();
     }
 
     return TaskModel(
       id: json['id']?.toString() ?? '',
-      code: json['code'] as String?,
-      title: json['title'] as String? ?? '',
-      description: json['description'] as String? ?? '',
+      code: json['code']?.toString(),
+      title: json['title']?.toString() ?? 'Chưa có tiêu đề',
+      description: json['description']?.toString() ?? '',
       status: taskStatus,
       priority: taskPriority,
-      assignedTo: json['assigned_to'] as String?,
-      projectId: json['project_id'] as String?,
-      assignee: resolvedAssignee ?? 'Nguyen Nhat Minh Quan',
-      project: resolvedProject ?? 'Lam do an flutter',
-      labels: labelList,
-      dueDate: taskDueDate,
-      createdAt: taskCreatedAt,
+      assignedTo: json['assigned_to']?.toString(),
+      projectId: json['project_id']?.toString(),
+      assignee: userName,
+      labels: parsedLabels,
+      project: projName,
+      dueDate: parsedDueDate,
+      createdAt: parsedCreatedAt,
     );
   }
 
   Map<String, dynamic> toMap() => toJson();
 
   Map<String, dynamic> toJson() {
-    return {
+    final map = <String, dynamic>{
       'title': title,
       'description': description,
       'status': status.name,
       'priority': priority.name,
-      'labels': labels,
-      if (code != null) 'code': code,
-      if (assignedTo != null) 'assigned_to': assignedTo,
-      if (projectId != null) 'project_id': projectId,
-      if (dueDate != null) 'due_date': dueDate?.toIso8601String(),
     };
+
+    if (code != null) map['code'] = code;
+    if (assignedTo != null) map['assigned_to'] = assignedTo;
+    if (projectId != null) map['project_id'] = projectId;
+    if (dueDate != null) map['due_date'] = dueDate!.toIso8601String();
+    if (labels.isNotEmpty) map['labels'] = labels;
+
+    return map;
   }
 }

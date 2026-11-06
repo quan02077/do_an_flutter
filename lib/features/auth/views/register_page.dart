@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -85,7 +84,7 @@ class _RegisterPageState extends State<RegisterPage> {
             const SizedBox(height: 40),
 
             const Text(
-              'Create account',
+              'Tạo tài khoản',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 28,
@@ -96,16 +95,16 @@ class _RegisterPageState extends State<RegisterPage> {
             const SizedBox(height: 10),
 
             const Text(
-              'Sign up to get started',
+              'Đăng ký để bắt đầu trải nghiệm',
               style: TextStyle(color: Colors.grey),
             ),
 
             const SizedBox(height: 35),
 
-            oNhap('Full name', nameController),
+            oNhap('Họ và tên', nameController),
             oNhap('Email', emailController),
-            oNhap('Password', passwordController, matKhau: true),
-            oNhap('Confirm password', confirmController,
+            oNhap('Mật khẩu', passwordController, matKhau: true),
+            oNhap('Xác nhận mật khẩu', confirmController,
                 matKhau: true),
 
             const SizedBox(height: 15),
@@ -119,7 +118,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   backgroundColor: Colors.white,
                   foregroundColor: Colors.black,
                 ),
-                child: const Text('Sign up'),
+                child: const Text('Đăng ký'),
               ),
             ),
 
@@ -131,7 +130,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   Navigator.pop(context);
                 },
                 child: const Text(
-                  'Already have an account? Log in',
+                  'Đã có tài khoản? Đăng nhập',
                   style: TextStyle(color: Colors.white70),
                 ),
               ),

@@ -30,10 +30,10 @@ class _CalendarViewState extends State<CalendarView> {
         return Column(
           children: [
             Container(
-              margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               decoration: BoxDecoration(
                 color: LinearTheme.surface,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(14),
                 border: Border.all(color: LinearTheme.surfaceBorder, width: 0.8),
               ),
               child: TableCalendar<TaskModel>(
@@ -61,25 +61,26 @@ class _CalendarViewState extends State<CalendarView> {
                   formatButtonShowsNext: false,
                   titleTextStyle: const TextStyle(
                     color: Colors.white,
-                    fontSize: 15,
+                    fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
-                  formatButtonTextStyle: const TextStyle(color: Colors.white, fontSize: 11),
+                  formatButtonTextStyle: const TextStyle(color: Colors.white, fontSize: 10.5),
                   formatButtonDecoration: BoxDecoration(
-                    color: const Color(0xFF26282E),
-                    borderRadius: BorderRadius.circular(12),
+                    color: LinearTheme.surfaceRaised,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: LinearTheme.surfaceBorder, width: 0.6),
                   ),
-                  leftChevronIcon: const Icon(Icons.chevron_left, color: LinearTheme.textSecondary),
-                  rightChevronIcon: const Icon(Icons.chevron_right, color: LinearTheme.textSecondary),
+                  leftChevronIcon: const Icon(Icons.chevron_left, color: LinearTheme.textSecondary, size: 20),
+                  rightChevronIcon: const Icon(Icons.chevron_right, color: LinearTheme.textSecondary, size: 20),
                 ),
                 daysOfWeekStyle: const DaysOfWeekStyle(
-                  weekdayStyle: TextStyle(color: LinearTheme.textSecondary, fontSize: 12),
-                  weekendStyle: TextStyle(color: Color(0xFFF2994A), fontSize: 12),
+                  weekdayStyle: TextStyle(color: LinearTheme.textSecondary, fontSize: 11.5),
+                  weekendStyle: TextStyle(color: Color(0xFFF2994A), fontSize: 11.5),
                 ),
                 calendarStyle: CalendarStyle(
-                  defaultTextStyle: const TextStyle(color: Colors.white, fontSize: 13),
-                  weekendTextStyle: const TextStyle(color: Color(0xFFD6D9E0), fontSize: 13),
-                  outsideTextStyle: const TextStyle(color: Color(0xFF484B55), fontSize: 13),
+                  defaultTextStyle: const TextStyle(color: Colors.white, fontSize: 12.5),
+                  weekendTextStyle: const TextStyle(color: Color(0xFFD6D9E0), fontSize: 12.5),
+                  outsideTextStyle: const TextStyle(color: Color(0xFF484B55), fontSize: 12.5),
                   todayDecoration: BoxDecoration(
                     color: LinearTheme.surfaceHighlight,
                     shape: BoxShape.circle,
@@ -100,29 +101,29 @@ class _CalendarViewState extends State<CalendarView> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
               child: Row(
                 children: [
-                  const Icon(Icons.event_note, color: LinearTheme.accentLight, size: 18),
+                  const Icon(Icons.event_note, color: LinearTheme.accentLight, size: 16),
                   const SizedBox(width: 8),
                   Text(
                     'Deadline ngày ${DateFormat('dd/MM/yyyy').format(selectedDay)}',
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 14,
+                      fontSize: 13,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                   const Spacer(),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF202227),
-                      borderRadius: BorderRadius.circular(10),
+                      color: LinearTheme.surfaceRaised,
+                      borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      '${tasksForDay.length} task',
-                      style: const TextStyle(color: LinearTheme.textSecondary, fontSize: 12),
+                      '${tasksForDay.length} việc',
+                      style: const TextStyle(color: LinearTheme.textSecondary, fontSize: 11),
                     ),
                   ),
                 ],
@@ -134,17 +135,17 @@ class _CalendarViewState extends State<CalendarView> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.event_available, size: 40, color: Colors.grey.shade700),
-                          const SizedBox(height: 10),
+                          Icon(Icons.event_available, size: 36, color: Colors.grey.shade700),
+                          const SizedBox(height: 8),
                           Text(
-                            'Không có deadline nào trong ngày ${DateFormat('dd/MM').format(selectedDay)}',
-                            style: const TextStyle(color: LinearTheme.textMuted, fontSize: 13),
+                            'Không có hạn chót nào trong ngày ${DateFormat('dd/MM').format(selectedDay)}',
+                            style: const TextStyle(color: LinearTheme.textMuted, fontSize: 12.5),
                           ),
                         ],
                       ),
                     )
                   : ListView.builder(
-                      padding: const EdgeInsets.only(bottom: 80),
+                      padding: const EdgeInsets.only(bottom: 95),
                       itemCount: tasksForDay.length,
                       itemBuilder: (context, index) {
                         final task = tasksForDay[index];

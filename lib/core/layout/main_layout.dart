@@ -15,20 +15,20 @@ class MainLayout extends StatefulWidget {
 }
 
 class _MainLayoutState extends State<MainLayout> {
-  int currentIndex = 1; // Mặc định mở tab Tasks
+  int currentIndex = 1; // Mặc định mở tab Công việc
 
   final List<Widget> pages = [
     const InboxPage(),
     const TaskMainPage(),
     const ProjectsPage(),
-    const SettingsPage(), // Màn hình Cài đặt của Thành viên 1
+    const SettingsPage(),
   ];
 
   final List<String> titles = [
-    'Inbox',
-    'Tasks',
-    'Projects',
-    'Settings',
+    'Thông báo',
+    'Công việc',
+    'Dự án',
+    'Cài đặt',
   ];
 
   @override

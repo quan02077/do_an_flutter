@@ -58,8 +58,9 @@ class _TaskDetailBottomSheetState extends State<TaskDetailBottomSheet> {
     if (title.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Vui lòng nhập tiêu đề Issue/Task'),
+          content: Text('Vui lòng nhập tiêu đề công việc'),
           backgroundColor: LinearTheme.priorityUrgent,
+          behavior: SnackBarBehavior.floating,
         ),
       );
       return;
@@ -70,6 +71,7 @@ class _TaskDetailBottomSheetState extends State<TaskDetailBottomSheet> {
       final newId = 'LIN-${100 + provider.tasks.length + 1}';
       final newTask = TaskModel(
         id: newId,
+        code: newId,
         title: title,
         description: _descController.text.trim(),
         status: _status,
@@ -97,35 +99,65 @@ class _TaskDetailBottomSheetState extends State<TaskDetailBottomSheet> {
     Navigator.pop(context);
   }
 
-  void _deleteCurrentTask() {
-    if (widget.task != null) {
-      TaskProvider().deleteTask(widget.task!.id);
-      Navigator.pop(context);
-    }
+  void _confirmDelete() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF16171B),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        title: const Text('Xác nhận xoá', style: TextStyle(color: Colors.white, fontSize: 16)),
+        content: Text(
+          'Bạn có chắc muốn xoá công việc "${widget.task?.displayCode}" không?',
+          style: const TextStyle(color: LinearTheme.textSecondary, fontSize: 13.5),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Huỷ', style: TextStyle(color: LinearTheme.textMuted)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              TaskProvider().deleteTask(widget.task!.id);
+              Navigator.pop(context);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: LinearTheme.priorityUrgent,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Xoá'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
-    final bottomInset = mediaQuery.viewInsets.bottom;
+    final isEditing = widget.task != null;
 
     return Container(
-      height: mediaQuery.size.height * 0.90,
+      height: mediaQuery.size.height * 0.85,
+      padding: EdgeInsets.only(bottom: mediaQuery.viewInsets.bottom),
       decoration: const BoxDecoration(
-        color: Color(0xFF101114),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+        color: Color(0xFF0F1013),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: Column(
         children: [
+          // Drag handle
           Container(
             width: 36,
             height: 4,
-            margin: const EdgeInsets.only(top: 8, bottom: 4),
+            margin: const EdgeInsets.only(top: 8, bottom: 6),
             decoration: BoxDecoration(
               color: Colors.white24,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
+
+          // Header
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
@@ -133,212 +165,151 @@ class _TaskDetailBottomSheetState extends State<TaskDetailBottomSheet> {
                 GestureDetector(
                   onTap: () => Navigator.pop(context),
                   child: Container(
-                    width: 36,
-                    height: 36,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF1C1D22),
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: LinearTheme.surfaceRaised,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.close, color: Colors.white, size: 20),
+                    child: const Icon(Icons.close, color: LinearTheme.textSecondary, size: 18),
                   ),
                 ),
-                const SizedBox(width: 10),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1C1D22),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(2),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF8B5CF6),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: const Icon(Icons.chevron_right, color: Colors.white, size: 14),
-                      ),
-                      const SizedBox(width: 8),
-                      const Text(
-                        'Nguyen Nhat Minh Quan',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
+                const SizedBox(width: 12),
+                Text(
+                  isEditing ? widget.task!.displayCode : 'Tạo mới công việc',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 const Spacer(),
-                if (widget.task != null) ...[
+                if (isEditing)
                   IconButton(
-                    icon: const Icon(Icons.delete_outline, color: LinearTheme.priorityUrgent, size: 22),
-                    onPressed: _deleteCurrentTask,
+                    icon: const Icon(Icons.delete_outline, color: LinearTheme.priorityUrgent, size: 20),
+                    onPressed: _confirmDelete,
                   ),
-                  const SizedBox(width: 4),
-                ],
-                GestureDetector(
-                  onTap: _saveTask,
-                  child: Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF2E313A),
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white12),
-                    ),
-                    child: const Icon(Icons.arrow_upward_rounded, color: Colors.white, size: 20),
+                const SizedBox(width: 4),
+                ElevatedButton(
+                  onPressed: _saveTask,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: LinearTheme.accent,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  ),
+                  child: Text(
+                    isEditing ? 'Lưu' : 'Tạo',
+                    style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600),
                   ),
                 ),
               ],
             ),
           ),
+
           const Divider(color: LinearTheme.surfaceBorder, height: 1),
+
+          // Body Form
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Title
                   TextField(
                     controller: _titleController,
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 20,
+                      fontSize: 18,
                       fontWeight: FontWeight.w600,
                     ),
                     decoration: const InputDecoration(
-                      hintText: 'Issue title',
+                      hintText: 'Tiêu đề công việc...',
                       hintStyle: TextStyle(
-                        color: Color(0xFF5E626E),
-                        fontSize: 20,
+                        color: Color(0xFF4C505C),
+                        fontSize: 18,
                         fontWeight: FontWeight.w600,
                       ),
                       border: InputBorder.none,
                       contentPadding: EdgeInsets.zero,
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  TextField(
-                    controller: _descController,
-                    maxLines: null,
-                    minLines: 4,
-                    style: const TextStyle(
-                      color: LinearTheme.textPrimary,
-                      fontSize: 14.5,
-                      height: 1.4,
-                    ),
-                    decoration: const InputDecoration(
-                      hintText: 'Description...',
-                      hintStyle: TextStyle(
-                        color: Color(0xFF5E626E),
-                        fontSize: 14.5,
-                      ),
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
+
+                  const SizedBox(height: 14),
+
+                  // Property Chips Row (Status, Priority, Assignee, Due date, Labels)
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
                       children: [
                         _buildPropertyChip(
-                          icon: LinearTheme.buildStatusIcon(_status, size: 14),
+                          icon: LinearTheme.buildStatusIcon(_status, size: 13),
                           label: LinearTheme.getStatusLabel(_status),
                           onTap: _showStatusPicker,
                         ),
                         const SizedBox(width: 8),
                         _buildPropertyChip(
-                          icon: LinearTheme.buildPriorityIcon(_priority, size: 14),
+                          icon: LinearTheme.buildPriorityIcon(_priority, size: 13),
                           label: _priority == TaskPriority.none
-                              ? 'Priority'
+                              ? 'Mức ưu tiên'
                               : LinearTheme.getPriorityLabel(_priority),
                           onTap: _showPriorityPicker,
                         ),
                         const SizedBox(width: 8),
                         _buildPropertyChip(
-                          icon: const Icon(Icons.person_outline, size: 15, color: LinearTheme.textSecondary),
-                          label: _assignee.isNotEmpty ? _assignee.split(' ').last : 'Assignee',
+                          icon: const Icon(Icons.person_outline, size: 13, color: LinearTheme.textSecondary),
+                          label: _assignee.isNotEmpty ? _assignee.split(' ').last : 'Người làm',
                           onTap: _showAssigneePicker,
                         ),
                         const SizedBox(width: 8),
                         _buildPropertyChip(
-                          icon: const Icon(Icons.local_offer_outlined, size: 14, color: LinearTheme.textSecondary),
-                          label: _labels.isNotEmpty ? _labels.first : 'Label',
-                          onTap: _showLabelPicker,
+                          icon: const Icon(Icons.calendar_today_outlined, size: 12, color: LinearTheme.textSecondary),
+                          label: _dueDate != null ? DateFormat('dd/MM/yyyy').format(_dueDate!) : 'Hạn chót',
+                          onTap: _showDatePicker,
                         ),
                         const SizedBox(width: 8),
                         _buildPropertyChip(
-                          icon: const Icon(Icons.calendar_today_outlined, size: 14, color: LinearTheme.textSecondary),
-                          label: _dueDate != null ? DateFormat('dd/MM/yyyy').format(_dueDate!) : 'Due date',
-                          onTap: _showDatePicker,
+                          icon: const Icon(Icons.local_offer_outlined, size: 12, color: LinearTheme.textSecondary),
+                          label: _labels.isNotEmpty ? _labels.first : 'Nhãn',
+                          onTap: _showLabelPicker,
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 10),
+
+                  const SizedBox(height: 18),
+                  const Divider(color: LinearTheme.surfaceBorder, height: 1),
+                  const SizedBox(height: 12),
+
+                  // Description
+                  TextField(
+                    controller: _descController,
+                    maxLines: null,
+                    minLines: 5,
+                    style: const TextStyle(
+                      color: LinearTheme.textPrimary,
+                      fontSize: 13.5,
+                      height: 1.5,
+                    ),
+                    decoration: const InputDecoration(
+                      hintText: 'Thêm mô tả chi tiết...',
+                      hintStyle: TextStyle(
+                        color: Color(0xFF4C505C),
+                        fontSize: 13.5,
+                      ),
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
                 ],
               ),
-            ),
-          ),
-          Container(
-            padding: EdgeInsets.only(
-              left: 16,
-              right: 16,
-              top: 10,
-              bottom: bottomInset > 0 ? bottomInset + 10 : 20,
-            ),
-            decoration: const BoxDecoration(
-              color: Color(0xFF141518),
-              border: Border(
-                top: BorderSide(color: LinearTheme.surfaceBorder, width: 0.8),
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _buildToolbarIcon(Icons.image_outlined, () {
-                  _insertFormatting('[image]');
-                }),
-                _buildToolbarIcon(Icons.alternate_email, () {
-                  _insertFormatting('@');
-                }),
-                _buildToolbarIcon(Icons.format_list_bulleted, () {
-                  _insertFormatting('\n- ');
-                }),
-                _buildToolbarIcon(Icons.format_list_numbered, () {
-                  _insertFormatting('\n1. ');
-                }),
-                _buildToolbarIcon(Icons.code, () {
-                  _insertFormatting('`code`');
-                }),
-                _buildToolbarIcon(Icons.format_quote, () {
-                  _insertFormatting('\n> ');
-                }),
-              ],
             ),
           ),
         ],
       ),
     );
-  }
-
-  void _insertFormatting(String text) {
-    final curText = _descController.text;
-    final selection = _descController.selection;
-    if (selection.isValid) {
-      final newText = curText.replaceRange(selection.start, selection.end, text);
-      _descController.value = TextEditingValue(
-        text: newText,
-        selection: TextSelection.collapsed(offset: selection.start + text.length),
-      );
-    } else {
-      _descController.text = curText + text;
-    }
   }
 
   Widget _buildPropertyChip({
@@ -348,38 +319,29 @@ class _TaskDetailBottomSheetState extends State<TaskDetailBottomSheet> {
   }) {
     return GestureDetector(
       onTap: onTap,
+      behavior: HitTestBehavior.opaque,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
         decoration: BoxDecoration(
-          color: const Color(0xFF1E2025),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFF2B2E37), width: 0.8),
+          color: LinearTheme.surface,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: LinearTheme.surfaceBorder, width: 0.8),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             icon,
-            const SizedBox(width: 6),
+            const SizedBox(width: 5),
             Text(
               label,
               style: const TextStyle(
                 color: LinearTheme.textPrimary,
-                fontSize: 12.5,
+                fontSize: 11.5,
                 fontWeight: FontWeight.w500,
               ),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildToolbarIcon(IconData icon, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        child: Icon(icon, color: const Color(0xFF9EA3B0), size: 21),
       ),
     );
   }
@@ -397,13 +359,14 @@ class _TaskDetailBottomSheetState extends State<TaskDetailBottomSheet> {
             mainAxisSize: MainAxisSize.min,
             children: TaskStatus.values.map((s) {
               return ListTile(
-                leading: LinearTheme.buildStatusIcon(s, size: 20),
+                dense: true,
+                leading: LinearTheme.buildStatusIcon(s, size: 18),
                 title: Text(
                   LinearTheme.getStatusLabel(s),
-                  style: const TextStyle(color: Colors.white, fontSize: 15),
+                  style: const TextStyle(color: Colors.white, fontSize: 14),
                 ),
                 trailing: _status == s
-                    ? const Icon(Icons.check, color: LinearTheme.accent, size: 20)
+                    ? const Icon(Icons.check, color: LinearTheme.accent, size: 18)
                     : null,
                 onTap: () {
                   setState(() => _status = s);
@@ -430,13 +393,14 @@ class _TaskDetailBottomSheetState extends State<TaskDetailBottomSheet> {
             mainAxisSize: MainAxisSize.min,
             children: TaskPriority.values.map((p) {
               return ListTile(
-                leading: LinearTheme.buildPriorityIcon(p, size: 20),
+                dense: true,
+                leading: LinearTheme.buildPriorityIcon(p, size: 18),
                 title: Text(
                   LinearTheme.getPriorityLabel(p),
-                  style: const TextStyle(color: Colors.white, fontSize: 15),
+                  style: const TextStyle(color: Colors.white, fontSize: 14),
                 ),
                 trailing: _priority == p
-                    ? const Icon(Icons.check, color: LinearTheme.accent, size: 20)
+                    ? const Icon(Icons.check, color: LinearTheme.accent, size: 18)
                     : null,
                 onTap: () {
                   setState(() => _priority = p);
@@ -453,9 +417,9 @@ class _TaskDetailBottomSheetState extends State<TaskDetailBottomSheet> {
   void _showAssigneePicker() {
     final members = [
       'Nguyen Nhat Minh Quan',
-      'Frontend Lead (Thanh vien 1)',
-      'Backend Engineer',
-      'UI/UX Designer',
+      'Thanh vien 1',
+      'Thanh vien 2',
+      'Thanh vien 3',
     ];
     showModalBottomSheet(
       context: context,
@@ -469,17 +433,18 @@ class _TaskDetailBottomSheetState extends State<TaskDetailBottomSheet> {
             mainAxisSize: MainAxisSize.min,
             children: members.map((m) {
               return ListTile(
+                dense: true,
                 leading: CircleAvatar(
-                  radius: 14,
+                  radius: 12,
                   backgroundColor: LinearTheme.accent,
                   child: Text(
                     m[0],
-                    style: const TextStyle(color: Colors.white, fontSize: 12),
+                    style: const TextStyle(color: Colors.white, fontSize: 11),
                   ),
                 ),
-                title: Text(m, style: const TextStyle(color: Colors.white)),
+                title: Text(m, style: const TextStyle(color: Colors.white, fontSize: 14)),
                 trailing: _assignee == m
-                    ? const Icon(Icons.check, color: LinearTheme.accent, size: 20)
+                    ? const Icon(Icons.check, color: LinearTheme.accent, size: 18)
                     : null,
                 onTap: () {
                   setState(() => _assignee = m);
@@ -494,49 +459,7 @@ class _TaskDetailBottomSheetState extends State<TaskDetailBottomSheet> {
   }
 
   void _showLabelPicker() {
-    final availableLabels = ['Feature', 'Bug', 'Design', 'Kanban', 'Calendar', 'Analytics', 'System'];
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: const Color(0xFF16171B),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (ctx, setModalState) {
-            return SafeArea(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: availableLabels.map((lbl) {
-                  final isSelected = _labels.contains(lbl);
-                  return ListTile(
-                    leading: const Icon(Icons.label_outline, color: Colors.grey, size: 20),
-                    title: Text('#$lbl', style: const TextStyle(color: Colors.white)),
-                    trailing: isSelected
-                        ? const Icon(Icons.check, color: LinearTheme.accent, size: 20)
-                        : null,
-                    onTap: () {
-                      setState(() {
-                        if (isSelected) {
-                          _labels.remove(lbl);
-                        } else {
-                          _labels.add(lbl);
-                        }
-                      });
-                      setModalState(() {});
-                    },
-                  );
-                }).toList(),
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  void _showProjectPicker() {
-    final projects = ['Linear Mobile App', 'Design System v1', 'Core Backend API'];
+    final availableLabels = ['Feature', 'Bug', 'Design', 'Kanban', 'Calendar', 'System'];
     showModalBottomSheet(
       context: context,
       backgroundColor: const Color(0xFF16171B),
@@ -547,15 +470,23 @@ class _TaskDetailBottomSheetState extends State<TaskDetailBottomSheet> {
         return SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            children: projects.map((proj) {
+            children: availableLabels.map((lbl) {
+              final isChosen = _labels.contains(lbl);
               return ListTile(
-                leading: const Icon(Icons.folder_outlined, color: Colors.grey, size: 20),
-                title: Text(proj, style: const TextStyle(color: Colors.white)),
-                trailing: _project == proj
-                    ? const Icon(Icons.check, color: LinearTheme.accent, size: 20)
+                dense: true,
+                leading: const Icon(Icons.local_offer_outlined, color: LinearTheme.textSecondary, size: 18),
+                title: Text('#$lbl', style: const TextStyle(color: Colors.white, fontSize: 14)),
+                trailing: isChosen
+                    ? const Icon(Icons.check, color: LinearTheme.accent, size: 18)
                     : null,
                 onTap: () {
-                  setState(() => _project = proj);
+                  setState(() {
+                    if (isChosen) {
+                      _labels.remove(lbl);
+                    } else {
+                      _labels.add(lbl);
+                    }
+                  });
                   Navigator.pop(ctx);
                 },
               );
@@ -567,24 +498,25 @@ class _TaskDetailBottomSheetState extends State<TaskDetailBottomSheet> {
   }
 
   Future<void> _showDatePicker() async {
+    final now = DateTime.now();
     final picked = await showDatePicker(
       context: context,
-      initialDate: _dueDate ?? DateTime.now(),
-      firstDate: DateTime.now().subtract(const Duration(days: 365)),
-      lastDate: DateTime.now().add(const Duration(days: 365 * 3)),
-      builder: (ctx, child) {
+      initialDate: _dueDate ?? now,
+      firstDate: now.subtract(const Duration(days: 365)),
+      lastDate: now.add(const Duration(days: 365 * 2)),
+      builder: (context, child) {
         return Theme(
           data: ThemeData.dark().copyWith(
             colorScheme: const ColorScheme.dark(
               primary: LinearTheme.accent,
-              surface: Color(0xFF1E2025),
-              onSurface: Colors.white,
+              surface: Color(0xFF16171B),
             ),
           ),
           child: child!,
         );
       },
     );
+
     if (picked != null) {
       setState(() => _dueDate = picked);
     }

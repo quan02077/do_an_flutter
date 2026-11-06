@@ -37,7 +37,7 @@ class DashboardView extends StatelessWidget {
                 children: [
                   Expanded(
                     child: _buildMetricCard(
-                      title: 'Tổng số Task',
+                      title: 'Tổng số công việc',
                       value: '$total',
                       icon: Icons.assignment_outlined,
                       color: LinearTheme.accentLight,
@@ -195,10 +195,10 @@ class DashboardView extends StatelessWidget {
                       spacing: 12,
                       runSpacing: 8,
                       children: [
-                        _buildLegendItem('Done', LinearTheme.statusDone, doneCount),
-                        _buildLegendItem('In Progress', LinearTheme.statusInProgress, inProgressCount),
-                        _buildLegendItem('Todo', const Color(0xFF64748B), todoCount),
-                        _buildLegendItem('Backlog', const Color(0xFF334155), backlogCount),
+                        _buildLegendItem('Hoàn thành', LinearTheme.statusDone, doneCount),
+                        _buildLegendItem('Đang làm', LinearTheme.statusInProgress, inProgressCount),
+                        _buildLegendItem('Cần làm', const Color(0xFF64748B), todoCount),
+                        _buildLegendItem('Chờ xử lý', const Color(0xFF334155), backlogCount),
                       ],
                     ),
                   ],
@@ -220,7 +220,7 @@ class DashboardView extends StatelessWidget {
                         Icon(Icons.bar_chart, color: LinearTheme.accentLight, size: 18),
                         SizedBox(width: 8),
                         Text(
-                          'Khối lượng công việc theo Priority',
+                          'Khối lượng theo mức độ ưu tiên',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 15,
@@ -244,7 +244,7 @@ class DashboardView extends StatelessWidget {
                             touchTooltipData: BarTouchTooltipData(
                               getTooltipColor: (_) => const Color(0xFF1E2025),
                               getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                                final priorities = ['Urgent', 'High', 'Medium', 'Low'];
+                                final priorities = ['Khẩn cấp', 'Cao', 'Trung bình', 'Thấp'];
                                 return BarTooltipItem(
                                   '${priorities[group.x]}: ${rod.toY.toInt()}',
                                   const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
@@ -273,7 +273,7 @@ class DashboardView extends StatelessWidget {
                               sideTitles: SideTitles(
                                 showTitles: true,
                                 getTitlesWidget: (value, meta) {
-                                  final titles = ['Urgent', 'High', 'Med', 'Low'];
+                                  final titles = ['Khẩn', 'Cao', 'TB', 'Thấp'];
                                   final idx = value.toInt();
                                   if (idx >= 0 && idx < titles.length) {
                                     return Padding(
