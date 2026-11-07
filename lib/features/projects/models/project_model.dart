@@ -33,8 +33,6 @@ class ProjectModel {
     );
   }
 
-  factory ProjectModel.fromMap(Map<String, dynamic> m) => ProjectModel.fromJson(m);
-
   factory ProjectModel.fromJson(Map<String, dynamic> json) {
     DateTime projectCreatedAt = DateTime.now();
     if (json['created_at'] != null) {
@@ -55,8 +53,6 @@ class ProjectModel {
       createdAt: projectCreatedAt,
     );
   }
-
-  Map<String, dynamic> toMap() => toJson();
 
   Map<String, dynamic> toJson() {
     return {

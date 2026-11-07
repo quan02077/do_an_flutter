@@ -84,8 +84,6 @@ class TaskModel {
     );
   }
 
-  factory TaskModel.fromMap(Map<String, dynamic> map) => TaskModel.fromJson(map);
-
   factory TaskModel.fromJson(Map<String, dynamic> json) {
     TaskStatus taskStatus = TaskStatus.todo;
     for (var s in TaskStatus.values) {
@@ -150,8 +148,6 @@ class TaskModel {
       createdAt: parsedCreatedAt,
     );
   }
-
-  Map<String, dynamic> toMap() => toJson();
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{

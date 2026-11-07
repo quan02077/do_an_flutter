@@ -12,23 +12,18 @@ class TaskProvider extends ChangeNotifier {
     _listenToTasksRealtime();
   }
 
-  // Danh sách công việc lưu trong bộ nhớ
   final List<TaskModel> _tasks = [];
 
-  // Bộ lọc hiện tại
   TaskStatus? _selectedStatusFilter;
   TaskPriority? _selectedPriorityFilter;
   String _searchQuery = '';
   DateTime _selectedCalendarDate = DateTime.now();
 
-  // Getters
   List<TaskModel> get tasks => List.unmodifiable(_tasks);
   TaskStatus? get selectedStatusFilter => _selectedStatusFilter;
   TaskPriority? get selectedPriorityFilter => _selectedPriorityFilter;
   String get searchQuery => _searchQuery;
   DateTime get selectedCalendarDate => _selectedCalendarDate;
-
-  // --- Các hàm cập nhật bộ lọc ---
 
   void setStatusFilter(TaskStatus? status) {
     _selectedStatusFilter = status;
@@ -50,43 +45,33 @@ class TaskProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Danh sách công việc đã qua bộ lọc (tìm kiếm, trạng thái, ưu tiên)
   List<TaskModel> get filteredTasks {
+    final query = _searchQuery.trim().toLowerCase();
+
     return _tasks.where((task) {
-      if (_selectedStatusFilter != null && task.status != _selectedStatusFilter) {
-        return false;
-      }
-      if (_selectedPriorityFilter != null && task.priority != _selectedPriorityFilter) {
-        return false;
-      }
-      if (_searchQuery.isNotEmpty) {
-        final query = _searchQuery.toLowerCase();
-        final matchTitle = task.title.toLowerCase().contains(query);
-        final matchId = task.id.toLowerCase().contains(query);
-        final matchCode = (task.code ?? '').toLowerCase().contains(query);
-        final matchDesc = task.description.toLowerCase().contains(query);
-        if (!matchTitle && !matchId && !matchCode && !matchDesc) return false;
-      }
-      return true;
+      final matchStatus = _selectedStatusFilter == null || task.status == _selectedStatusFilter;
+      final matchPriority = _selectedPriorityFilter == null || task.priority == _selectedPriorityFilter;
+      final matchSearch = query.isEmpty ||
+          task.title.toLowerCase().contains(query) ||
+          task.displayCode.toLowerCase().contains(query) ||
+          task.description.toLowerCase().contains(query);
+
+      return matchStatus && matchPriority && matchSearch;
     }).toList();
   }
 
-  /// Lấy danh sách công việc theo từng trạng thái (dùng cho Kanban & Chips)
   List<TaskModel> getTasksByStatus(TaskStatus status) {
-    return _tasks.where((t) => t.status == status).toList();
+    return _tasks.where((task) => task.status == status).toList();
   }
 
-  /// Lấy danh sách công việc theo ngày hạn chót (dùng cho Lịch)
   List<TaskModel> getTasksForDate(DateTime date) {
-    return _tasks.where((t) {
-      if (t.dueDate == null) return false;
-      return t.dueDate!.year == date.year &&
-          t.dueDate!.month == date.month &&
-          t.dueDate!.day == date.day;
+    return _tasks.where((task) {
+      if (task.dueDate == null) return false;
+      return task.dueDate!.year == date.year &&
+          task.dueDate!.month == date.month &&
+          task.dueDate!.day == date.day;
     }).toList();
   }
-
-  // --- Lắng nghe Real-time qua TaskService ---
 
   void _listenToTasksRealtime() {
     _taskService.getTasksStream().listen(
@@ -96,12 +81,10 @@ class TaskProvider extends ChangeNotifier {
         notifyListeners();
       },
       onError: (err) {
-        debugPrint('Lỗi Real-time Stream: $err');
+        debugPrint('Lỗi Realtime Stream: $err');
       },
     );
   }
-
-  // --- Các thao tác CRUD (gọi qua TaskService) ---
 
   Future<void> addTask(TaskModel task) async {
     await _taskService.createTask(task);
