@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:do_an_flutter/core/theme/linear_theme.dart';
+import 'package:do_an_flutter/features/projects/widgets/project_form_sheet.dart';
 import 'package:do_an_flutter/features/tasks/views/task_detail_bottom_sheet.dart';
 
 class FloatingToolbar extends StatelessWidget {
@@ -52,10 +53,14 @@ class FloatingToolbar extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            // Nút tròn tạo nhanh task
+            // Nút tròn tạo nhanh theo tab đang đứng
             GestureDetector(
               onTap: () {
-                TaskDetailBottomSheet.show(context);
+                if (currentIndex == 2) {
+                  ProjectFormSheet.show(context);
+                } else {
+                  TaskDetailBottomSheet.show(context);
+                }
               },
               child: Container(
                 padding: const EdgeInsets.all(14),

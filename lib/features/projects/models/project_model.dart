@@ -15,6 +15,11 @@ class ProjectModel {
     DateTime? createdAt,
   }) : createdAt = createdAt ?? DateTime.now();
 
+  String get displayCode {
+    if (id.length >= 4) return 'PRJ-${id.substring(0, 4).toUpperCase()}';
+    return id.isNotEmpty ? 'PRJ-$id' : 'PRJ-NEW';
+  }
+
   ProjectModel copyWith({
     String? id,
     String? name,

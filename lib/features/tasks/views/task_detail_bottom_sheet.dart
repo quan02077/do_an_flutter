@@ -2,19 +2,36 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/task_model.dart';
 import '../state/task_provider.dart';
+import '../../projects/state/project_provider.dart';
 import '../../../core/theme/linear_theme.dart';
 
 class TaskDetailBottomSheet extends StatefulWidget {
   final TaskModel? task;
+  final String? initialProjectId;
+  final String? initialProjectName;
 
-  const TaskDetailBottomSheet({super.key, this.task});
+  const TaskDetailBottomSheet({
+    super.key,
+    this.task,
+    this.initialProjectId,
+    this.initialProjectName,
+  });
 
-  static Future<void> show(BuildContext context, {TaskModel? task}) {
+  static Future<void> show(
+    BuildContext context, {
+    TaskModel? task,
+    String? initialProjectId,
+    String? initialProjectName,
+  }) {
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => TaskDetailBottomSheet(task: task),
+      builder: (ctx) => TaskDetailBottomSheet(
+        task: task,
+        initialProjectId: initialProjectId,
+        initialProjectName: initialProjectName,
+      ),
     );
   }
 
@@ -30,6 +47,7 @@ class _TaskDetailBottomSheetState extends State<TaskDetailBottomSheet> {
   late String _assignee;
   late List<String> _labels;
   late String _project;
+  String? _projectId;
   DateTime? _dueDate;
 
   @override
@@ -42,7 +60,8 @@ class _TaskDetailBottomSheetState extends State<TaskDetailBottomSheet> {
     _priority = t?.priority ?? TaskPriority.none;
     _assignee = t?.assignee ?? 'Nguyen Nhat Minh Quan';
     _labels = List.from(t?.labels ?? []);
-    _project = t?.project ?? 'Linear Mobile App';
+    _project = t?.project ?? widget.initialProjectName ?? 'Linear Mobile App';
+    _projectId = t?.projectId ?? widget.initialProjectId;
     _dueDate = t?.dueDate;
   }
 
@@ -79,6 +98,7 @@ class _TaskDetailBottomSheetState extends State<TaskDetailBottomSheet> {
         assignee: _assignee,
         labels: _labels,
         project: _project,
+        projectId: _projectId,
         dueDate: _dueDate,
       );
       provider.addTask(newTask);
@@ -91,6 +111,7 @@ class _TaskDetailBottomSheetState extends State<TaskDetailBottomSheet> {
         assignee: _assignee,
         labels: _labels,
         project: _project,
+        projectId: _projectId,
         dueDate: _dueDate,
       );
       provider.updateTask(updated);
@@ -268,6 +289,12 @@ class _TaskDetailBottomSheetState extends State<TaskDetailBottomSheet> {
                           icon: const Icon(Icons.calendar_today_outlined, size: 12, color: LinearTheme.textSecondary),
                           label: _dueDate != null ? DateFormat('dd/MM/yyyy').format(_dueDate!) : 'Hạn chót',
                           onTap: _showDatePicker,
+                        ),
+                        const SizedBox(width: 8),
+                        _buildPropertyChip(
+                          icon: const Icon(Icons.view_in_ar_rounded, size: 12, color: Color(0xFFEB5757)),
+                          label: _projectId != null ? _project : 'Dự án',
+                          onTap: _showProjectPicker,
                         ),
                         const SizedBox(width: 8),
                         _buildPropertyChip(
@@ -492,6 +519,52 @@ class _TaskDetailBottomSheetState extends State<TaskDetailBottomSheet> {
               );
             }).toList(),
           ),
+        );
+      },
+    );
+  }
+
+  void _showProjectPicker() {
+    final projects = ProjectProvider().projects;
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF16171B),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: projects.isEmpty
+              ? const Padding(
+                  padding: EdgeInsets.all(24),
+                  child: Center(
+                    child: Text(
+                      'Chưa có dự án nào',
+                      style: TextStyle(color: LinearTheme.textSecondary),
+                    ),
+                  ),
+                )
+              : Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: projects.map((proj) {
+                    final isSelected = _projectId == proj.id;
+                    return ListTile(
+                      dense: true,
+                      leading: const Icon(Icons.view_in_ar_rounded, color: Color(0xFFEB5757), size: 18),
+                      title: Text(proj.name, style: const TextStyle(color: Colors.white, fontSize: 14)),
+                      trailing: isSelected
+                          ? const Icon(Icons.check, color: LinearTheme.accent, size: 18)
+                          : null,
+                      onTap: () {
+                        setState(() {
+                          _projectId = proj.id;
+                          _project = proj.name;
+                        });
+                        Navigator.pop(ctx);
+                      },
+                    );
+                  }).toList(),
+                ),
         );
       },
     );
