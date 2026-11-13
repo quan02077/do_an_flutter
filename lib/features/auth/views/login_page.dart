@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:do_an_flutter/features/auth/views/register_page.dart';
 import 'package:do_an_flutter/features/auth/views/forgot_password_page.dart';
+import '../state/auth_provider.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -14,23 +16,61 @@ class _LoginPageState extends State<LoginPage> {
   final passwordController = TextEditingController();
 
   bool hienMatKhau = false;
+  bool _isLoading = false;
 
-  void dangNhap() {
-    if (emailController.text.isEmpty ||
-        passwordController.text.isEmpty) {
+  Future<void> dangNhap() async {
+    final email = emailController.text.trim();
+    final password = passwordController.text;
+
+    if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Vui lòng nhập email và mật khẩu'),
+          content: Text('Vui lòng nhập đầy đủ email và mật khẩu'),
         ),
       );
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Chưa kết nối chức năng đăng nhập'),
-      ),
-    );
+    setState(() => _isLoading = true);
+
+    try {
+      await AuthProvider().signIn(email, password);
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Đăng nhập thành công!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      Navigator.pop(context);
+    } on AuthException catch (e) {
+      if (!mounted) return;
+      String message = e.message;
+      if (message.contains('Invalid login credentials')) {
+        message = 'Email hoặc mật khẩu không chính xác';
+      } else if (message.contains('Email not confirmed')) {
+        message = 'Vui lòng xác thực email trước khi đăng nhập';
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Đã xảy ra lỗi: $e'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   @override
@@ -144,12 +184,25 @@ class _LoginPageState extends State<LoginPage> {
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                onPressed: dangNhap,
+                onPressed: _isLoading ? null : dangNhap,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,
                   foregroundColor: Colors.black,
+                  disabledBackgroundColor: Colors.white54,
                 ),
-                child: const Text('Đăng nhập'),
+                child: _isLoading
+                    ? const SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.black,
+                        ),
+                      )
+                    : const Text(
+                        'Đăng nhập',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
               ),
             ),
 

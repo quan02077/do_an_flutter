@@ -29,8 +29,6 @@ class UserModel {
     );
   }
 
-  factory UserModel.fromMap(Map<String, dynamic> m) => UserModel.fromJson(m);
-
   factory UserModel.fromJson(Map<String, dynamic> json) {
     DateTime userCreatedAt = DateTime.now();
     if (json['created_at'] != null) {
@@ -45,8 +43,6 @@ class UserModel {
       createdAt: userCreatedAt,
     );
   }
-
-  Map<String, dynamic> toMap() => toJson();
 
   Map<String, dynamic> toJson() {
     return {
