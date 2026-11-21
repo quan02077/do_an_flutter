@@ -86,19 +86,43 @@ class TaskProvider extends ChangeNotifier {
     );
   }
 
+  /// Thêm công việc (Cập nhật lạc quan ngay tức thì trên UI + Lưu vào Supabase)
   Future<void> addTask(TaskModel task) async {
-    await _taskService.createTask(task);
+    _tasks.insert(0, task);
+    notifyListeners(); // UI vẽ lại ngay lập tức!
+    try {
+      await _taskService.createTask(task);
+    } catch (e) {
+      _tasks.removeWhere((t) => t.id == task.id);
+      notifyListeners();
+      rethrow;
+    }
   }
 
+  /// Sửa công việc (Cập nhật tức thì)
   Future<void> updateTask(TaskModel updatedTask) async {
+    final index = _tasks.indexWhere((t) => t.id == updatedTask.id);
+    if (index != -1) {
+      _tasks[index] = updatedTask;
+      notifyListeners(); // UI cập nhật ngay lập tức!
+    }
     await _taskService.updateTask(updatedTask);
   }
 
+  /// Kéo thả đổi trạng thái công việc (Cập nhật tức thì 0 giây)
   Future<void> moveTask(String taskId, TaskStatus newStatus) async {
+    final index = _tasks.indexWhere((t) => t.id == taskId);
+    if (index != -1) {
+      _tasks[index] = _tasks[index].copyWith(status: newStatus);
+      notifyListeners(); // Thẻ nhảy sang cột mới ngay lập tức!
+    }
     await _taskService.updateTaskStatus(taskId, newStatus);
   }
 
+  /// Xoá công việc (Xoá tức thì khỏi màn hình)
   Future<void> deleteTask(String taskId) async {
+    _tasks.removeWhere((t) => t.id == taskId);
+    notifyListeners(); // Biến mất khỏi danh sách ngay!
     await _taskService.deleteTask(taskId);
   }
 }

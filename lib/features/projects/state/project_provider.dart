@@ -1,11 +1,9 @@
-import 'package:do_an_flutter/features/tasks/state/task_provider.dart';
 import 'package:flutter/material.dart';
 import '../models/project_model.dart';
 import '../services/project_service.dart';
-import '../../tasks/services/task_service.dart';
-import '../../tasks/models/task_model.dart';
+import '../../tasks/state/task_provider.dart';
 
-class ProjectProvider extends ChangeNotifier{
+class ProjectProvider extends ChangeNotifier {
   static final ProjectProvider _instance = ProjectProvider._internal();
   factory ProjectProvider() => _instance;
 
@@ -35,7 +33,7 @@ class ProjectProvider extends ChangeNotifier{
 
   List<ProjectModel> get filteredProjects {
     final query = _searchQuery.trim().toLowerCase();
-    if(query.isEmpty) return _projects;
+    if (query.isEmpty) return _projects;
 
     return _projects.where((project) {
       final matchName = project.name.toLowerCase().contains(query);
@@ -51,11 +49,11 @@ class ProjectProvider extends ChangeNotifier{
     }).length;
   }
 
-  int getCompleteTask(String projectId, String projectName){
+  int getCompleteTask(String projectId, String projectName) {
     final allTasks = TaskProvider().tasks;
     return allTasks.where((task) {
-      final isMatch = task.projectId == projectId || task.project == projectName;
-      return isMatch && task.status == TaskStatus.done;
+      final isProject = task.projectId == projectId || task.project == projectName;
+      return isProject && task.status.name == 'done';
     }).length;
   }
 
@@ -68,26 +66,44 @@ class ProjectProvider extends ChangeNotifier{
 
   void _listenToProjectsRealtime() {
     _projectService.getProjectsStream().listen(
-        (projectList) {
-          _projects.clear();
-          _projects.addAll(projectList);
-          notifyListeners();
-        },
-        onError: (err) {
-          debugPrint('Lỗi RealTime projects: $err');
-        },
+      (projectList) {
+        _projects.clear();
+        _projects.addAll(projectList);
+        notifyListeners();
+      },
+      onError: (err) {
+        debugPrint('Lỗi RealTime projects: $err');
+      },
     );
   }
 
+  /// Thêm dự án (Cập nhật ngay tức thì)
   Future<void> addProject(ProjectModel project) async {
-    await _projectService.createdProject(project);
+    _projects.insert(0, project);
+    notifyListeners();
+    try {
+      await _projectService.createdProject(project);
+    } catch (e) {
+      _projects.removeWhere((p) => p.id == project.id);
+      notifyListeners();
+      rethrow;
+    }
   }
 
+  /// Sửa dự án (Cập nhật ngay tức thì)
   Future<void> updateProject(ProjectModel project) async {
+    final index = _projects.indexWhere((p) => p.id == project.id);
+    if (index != -1) {
+      _projects[index] = project;
+      notifyListeners();
+    }
     await _projectService.updateProject(project);
   }
 
+  /// Xoá dự án (Xoá ngay tức thì)
   Future<void> deleteProject(String projectId) async {
+    _projects.removeWhere((p) => p.id == projectId);
+    notifyListeners();
     await _projectService.deleteProject(projectId);
   }
 }

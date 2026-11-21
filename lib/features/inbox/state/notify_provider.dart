@@ -18,10 +18,7 @@ class NotifyProvider extends ChangeNotifier {
   List<NotifyModel> get notifications => List.unmodifiable(_notifications);
   String get searchQuery => _searchQuery;
 
-  /// Đếm tổng số thông báo
   int get notifyCount => _notifications.length;
-
-  /// Đếm số thông báo CHƯA ĐỌC
   int get unreadCount => _notifications.where((n) => !n.isRead).length;
 
   bool _isNotificationEnabled = true;
@@ -32,12 +29,11 @@ class NotifyProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setNotificationEnabled(bool value){
+  void setNotificationEnabled(bool value) {
     _isNotificationEnabled = value;
     notifyListeners();
   }
 
-  /// Danh sách thông báo sau khi lọc theo từ khóa tìm kiếm
   List<NotifyModel> get filteredNotifications {
     final query = _searchQuery.trim().toLowerCase();
     if (query.isEmpty) return _notifications;
@@ -49,10 +45,9 @@ class NotifyProvider extends ChangeNotifier {
     }).toList();
   }
 
-  /// Lắng nghe dữ liệu real-time từ Supabase
   void _listenToNotificationRealTime() {
     _notifyService.getNotificationsStream().listen(
-          (notificationList) {
+      (notificationList) {
         _notifications.clear();
         _notifications.addAll(notificationList);
         notifyListeners();
@@ -63,18 +58,29 @@ class NotifyProvider extends ChangeNotifier {
     );
   }
 
-  /// Đánh dấu đã đọc
+  /// Đánh dấu đã đọc (Cập nhật ngay tức thì)
   Future<void> markAsRead(String notificationId) async {
+    final index = _notifications.indexWhere((n) => n.id == notificationId);
+    if (index != -1) {
+      _notifications[index] = _notifications[index].copyWith(isRead: true);
+      notifyListeners();
+    }
     await _notifyService.markAsRead(notificationId);
   }
 
-  /// Đánh dấu tất cả đã đọc
+  /// Đánh dấu tất cả đã đọc (Cập nhật ngay tức thì)
   Future<void> markAllAsRead() async {
+    for (int i = 0; i < _notifications.length; i++) {
+      _notifications[i] = _notifications[i].copyWith(isRead: true);
+    }
+    notifyListeners();
     await _notifyService.markAllAsRead();
   }
 
-  /// Xoá thông báo
+  /// Xoá thông báo (Cập nhật ngay tức thì)
   Future<void> deleteNotification(String notificationId) async {
+    _notifications.removeWhere((n) => n.id == notificationId);
+    notifyListeners();
     await _notifyService.deleteNotification(notificationId);
   }
 }
