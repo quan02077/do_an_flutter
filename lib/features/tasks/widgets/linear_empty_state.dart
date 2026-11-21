@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../theme/linear_theme.dart';
+import '../../../core/theme/linear_theme.dart';
 
 class LinearEmptyState extends StatelessWidget {
   final String title;
@@ -7,7 +7,7 @@ class LinearEmptyState extends StatelessWidget {
 
   const LinearEmptyState({
     super.key,
-    this.title = 'No issues assigned to you',
+    this.title = 'Chưa có công việc nào được phân công',
     this.subtitle,
   });
 

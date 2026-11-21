@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/task_model.dart';
+import 'package:do_an_flutter/features/tasks/models/task_model.dart';
 
 class LinearTheme {
   static const Color background = Color(0xFF08090A);
@@ -30,30 +30,30 @@ class LinearTheme {
   static String getStatusLabel(TaskStatus status) {
     switch (status) {
       case TaskStatus.backlog:
-        return 'Backlog';
+        return 'Chờ xử lý';
       case TaskStatus.todo:
-        return 'Todo';
+        return 'Cần làm';
       case TaskStatus.inProgress:
-        return 'In Progress';
+        return 'Đang làm';
       case TaskStatus.done:
-        return 'Done';
+        return 'Hoàn thành';
       case TaskStatus.canceled:
-        return 'Canceled';
+        return 'Đã huỷ';
     }
   }
 
   static String getPriorityLabel(TaskPriority priority) {
     switch (priority) {
       case TaskPriority.urgent:
-        return 'Urgent';
+        return 'Khẩn cấp';
       case TaskPriority.high:
-        return 'High';
+        return 'Cao';
       case TaskPriority.medium:
-        return 'Medium';
+        return 'Trung bình';
       case TaskPriority.low:
-        return 'Low';
+        return 'Thấp';
       case TaskPriority.none:
-        return 'No priority';
+        return 'Không ưu tiên';
     }
   }
 
