@@ -15,10 +15,15 @@ class TaskService {
         .map((dataList) => dataList.map((json) => TaskModel.fromJson(json)).toList());
   }
 
-  /// Thêm công việc mới vào Supabase
-  Future<void> createTask(TaskModel task) async {
+  /// Thêm công việc mới vào Supabase và trả về bản ghi kèm UUID thật từ server
+  Future<TaskModel> createTask(TaskModel task) async {
     try {
-      await _supabase.from('tasks').insert(task.toJson());
+      final response = await _supabase
+          .from('tasks')
+          .insert(task.toJson())
+          .select()
+          .single();
+      return TaskModel.fromJson(response);
     } catch (e) {
       debugPrint('Lỗi Backend khi thêm task: $e');
       rethrow;

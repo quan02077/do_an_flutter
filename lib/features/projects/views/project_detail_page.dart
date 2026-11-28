@@ -9,6 +9,7 @@ import '../widgets/project_activity_tab.dart';
 import '../widgets/project_form_sheet.dart';
 import '../widgets/project_issues_tab.dart';
 import '../widgets/project_overview_tab.dart';
+import 'project_members_page.dart';
 
 class ProjectDetailPage extends StatefulWidget {
   final ProjectModel project;
@@ -152,6 +153,13 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
                                     initialProjectId: currentProject.id,
                                     initialProjectName: currentProject.name,
                                   );
+                                } else if (value == 'members') {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => ProjectMembersPage(project: currentProject),
+                                    ),
+                                  );
                                 } else if (value == 'edit') {
                                   ProjectFormSheet.show(context, project: currentProject);
                                 } else if (value == 'delete') {
@@ -162,6 +170,10 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
                                 PopupMenuItem(
                                   value: 'add_task',
                                   child: Text('Thêm công việc mới', style: TextStyle(color: Colors.white, fontSize: 13)),
+                                ),
+                                PopupMenuItem(
+                                  value: 'members',
+                                  child: Text('Quản lý thành viên', style: TextStyle(color: Colors.white, fontSize: 13)),
                                 ),
                                 PopupMenuItem(
                                   value: 'edit',

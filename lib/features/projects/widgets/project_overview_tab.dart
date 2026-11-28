@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/linear_theme.dart';
+import '../../auth/state/auth_provider.dart';
 import '../models/project_model.dart';
+import '../state/project_provider.dart';
+import '../views/project_members_page.dart';
 
 class ProjectOverviewTab extends StatelessWidget {
   final ProjectModel project;
@@ -54,6 +57,78 @@ class ProjectOverviewTab extends StatelessWidget {
             icon: Icons.calendar_today_outlined,
             label: 'Ngày tạo',
             value: DateFormat('dd/MM/yyyy').format(project.createdAt),
+          ),
+          const SizedBox(height: 24),
+          const Divider(color: LinearTheme.surfaceBorder, height: 1),
+          const SizedBox(height: 16),
+
+          // Phần hiển thị thành viên nhóm tham gia
+          Row(
+            children: [
+              const Text(
+                'Thành viên nhóm',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const Spacer(),
+              TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => ProjectMembersPage(project: project)),
+                  );
+                },
+                child: const Text(
+                  'Quản lý thành viên',
+                  style: TextStyle(color: LinearTheme.accentLight, fontSize: 12.5),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          ListenableBuilder(
+            listenable: Listenable.merge([AuthProvider(), ProjectProvider()]),
+            builder: (context, _) {
+              final members = ProjectProvider().getUsersForProject(project.id);
+              return Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: members.map((user) {
+                  final name = user.fullname.isNotEmpty
+                      ? user.fullname
+                      : user.email.split('@').first;
+                  return Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: LinearTheme.surface,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: LinearTheme.surfaceBorder, width: 0.8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        CircleAvatar(
+                          radius: 10,
+                          backgroundColor: LinearTheme.accent,
+                          child: Text(
+                            name.isNotEmpty ? name[0].toUpperCase() : '?',
+                            style: const TextStyle(color: Colors.white, fontSize: 10),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          name,
+                          style: const TextStyle(color: LinearTheme.textPrimary, fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              );
+            },
           ),
         ],
       ),

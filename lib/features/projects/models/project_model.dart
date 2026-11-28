@@ -64,6 +64,7 @@ class ProjectModel {
       'name': name,
       'description': description,
       if (ownerId != null) 'owner_id': ownerId,
+      if (ownerName != null) 'owner_name': ownerName,
       'created_at': createdAt.toIso8601String(),
     };
   }

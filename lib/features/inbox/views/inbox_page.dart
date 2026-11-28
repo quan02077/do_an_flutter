@@ -2,11 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/linear_theme.dart';
 import '../models/notify_model.dart';
-import '../services/notify_service.dart';
 import '../state/notify_provider.dart';
 
-class InboxPage extends StatelessWidget {
+class InboxPage extends StatefulWidget {
   const InboxPage({super.key});
+
+  @override
+  State<InboxPage> createState() => _InboxPageState();
+}
+
+class _InboxPageState extends State<InboxPage> {
+  bool _onlyUnread = false;
 
   void _showNotificationDetail(BuildContext context, NotifyModel notify) {
     if (!notify.isRead) {
@@ -111,137 +117,164 @@ class InboxPage extends StatelessWidget {
                   ),
                 ),
 
-              // Danh sách thông báo
+              // Danh sách thông báo (đọc từ NotifyProvider đã lọc theo user)
               Expanded(
-                child: StreamBuilder<List<NotifyModel>>(
-                  stream: NotifyService().getNotificationsStream(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(
-                        child: SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: LinearTheme.accent),
-                        ),
-                      );
-                    }
+                child: Builder(
+                  builder: (context) {
+                    final allNotifications = notifyProvider.notifications;
+                    final unreadTotal = allNotifications.where((n) => !n.isRead).length;
+                    final notifications = _onlyUnread
+                        ? allNotifications.where((n) => !n.isRead).toList()
+                        : allNotifications;
 
-                    final notifications = snapshot.data ?? [];
-
-                    if (notifications.isEmpty) {
-                      return Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(32),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
+                    return Column(
+                      children: [
+                        // Thanh lọc nhanh: Tất cả | Chưa đọc | Đọc hết
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                          child: Row(
                             children: [
-                              Container(
-                                width: 64,
-                                height: 64,
-                                decoration: BoxDecoration(
-                                  color: LinearTheme.surface,
-                                  shape: BoxShape.circle,
-                                  border: Border.all(color: LinearTheme.surfaceBorder, width: 0.8),
+                              _buildFilterTab(
+                                label: 'Tất cả (${allNotifications.length})',
+                                isSelected: !_onlyUnread,
+                                onTap: () => setState(() => _onlyUnread = false),
+                              ),
+                              const SizedBox(width: 8),
+                              _buildFilterTab(
+                                label: 'Chưa đọc ($unreadTotal)',
+                                isSelected: _onlyUnread,
+                                onTap: () => setState(() => _onlyUnread = true),
+                              ),
+                              const Spacer(),
+                              if (unreadTotal > 0)
+                                TextButton(
+                                  onPressed: () => notifyProvider.markAllAsRead(),
+                                  child: const Text(
+                                    'Đọc hết',
+                                    style: TextStyle(color: LinearTheme.accentLight, fontSize: 12),
+                                  ),
                                 ),
-                                child: const Icon(Icons.inbox_outlined, size: 30, color: LinearTheme.textMuted),
-                              ),
-                              const SizedBox(height: 16),
-                              const Text(
-                                'Hộp thư thông báo trống',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              const Text(
-                                'Tất cả thông báo về công việc, tiến độ dự án hoặc cập nhật nhóm sẽ hiển thị tại đây.',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(color: LinearTheme.textSecondary, fontSize: 13, height: 1.4),
-                              ),
                             ],
                           ),
                         ),
-                      );
-                    }
 
-                    return ListView.separated(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      itemCount: notifications.length,
-                      separatorBuilder: (_, __) => const Divider(
-                        color: LinearTheme.surfaceBorder,
-                        height: 1,
-                        indent: 64,
-                      ),
-                      itemBuilder: (context, index) {
-                        final item = notifications[index];
-                        return Dismissible(
-                          key: Key(item.id),
-                          direction: DismissDirection.endToStart,
-                          background: Container(
-                            color: LinearTheme.priorityUrgent,
-                            alignment: Alignment.centerRight,
-                            padding: const EdgeInsets.only(right: 20),
-                            child: const Icon(Icons.delete_outline, color: Colors.white),
-                          ),
-                          onDismissed: (_) {
-                            notifyProvider.deleteNotification(item.id);
-                          },
-                          child: ListTile(
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                            leading: Stack(
-                              clipBehavior: Clip.none,
-                              children: [
-                                Container(
-                                  width: 40,
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                    color: LinearTheme.surface,
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(color: LinearTheme.surfaceBorder, width: 0.8),
-                                  ),
-                                  child: Icon(
-                                    item.isRead ? Icons.mark_email_read_outlined : Icons.mark_email_unread_outlined,
-                                    color: item.isRead ? LinearTheme.textMuted : LinearTheme.accentLight,
-                                    size: 20,
-                                  ),
-                                ),
-                                if (!item.isRead)
-                                  Positioned(
-                                    top: -2,
-                                    right: -2,
-                                    child: Container(
-                                      width: 9,
-                                      height: 9,
-                                      decoration: const BoxDecoration(
-                                        color: LinearTheme.accent,
-                                        shape: BoxShape.circle,
-                                      ),
+                        // Danh sách thông báo
+                        Expanded(
+                          child: notifications.isEmpty
+                              ? Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(32),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Container(
+                                          width: 64,
+                                          height: 64,
+                                          decoration: BoxDecoration(
+                                            color: LinearTheme.surface,
+                                            shape: BoxShape.circle,
+                                            border: Border.all(color: LinearTheme.surfaceBorder, width: 0.8),
+                                          ),
+                                          child: const Icon(Icons.inbox_outlined, size: 30, color: LinearTheme.textMuted),
+                                        ),
+                                        const SizedBox(height: 16),
+                                        Text(
+                                          _onlyUnread ? 'Không có thông báo chưa đọc' : 'Hộp thư thông báo trống',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        const Text(
+                                          'Tất cả thông báo về công việc, tiến độ dự án hoặc cập nhật nhóm sẽ hiển thị tại đây.',
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(color: LinearTheme.textSecondary, fontSize: 13, height: 1.4),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                              ],
-                            ),
-                            title: Text(
-                              item.title,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color: item.isRead ? Colors.white70 : Colors.white,
-                                fontSize: 14,
-                                fontWeight: item.isRead ? FontWeight.normal : FontWeight.w600,
-                              ),
-                            ),
-                            subtitle: Text(
-                              '${item.body} · ${DateFormat('dd/MM HH:mm').format(item.createdAt)}',
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(color: LinearTheme.textSecondary, fontSize: 12),
-                            ),
-                            onTap: () => _showNotificationDetail(context, item),
-                          ),
-                        );
-                      },
+                                )
+                              : ListView.separated(
+                                  padding: const EdgeInsets.symmetric(vertical: 8),
+                                  itemCount: notifications.length,
+                                  separatorBuilder: (_, __) => const Divider(
+                                    color: LinearTheme.surfaceBorder,
+                                    height: 1,
+                                    indent: 64,
+                                  ),
+                                  itemBuilder: (context, index) {
+                                    final item = notifications[index];
+                                    return Dismissible(
+                                      key: Key(item.id),
+                                      direction: DismissDirection.endToStart,
+                                      background: Container(
+                                        color: LinearTheme.priorityUrgent,
+                                        alignment: Alignment.centerRight,
+                                        padding: const EdgeInsets.only(right: 20),
+                                        child: const Icon(Icons.delete_outline, color: Colors.white),
+                                      ),
+                                      onDismissed: (_) {
+                                        notifyProvider.deleteNotification(item.id);
+                                      },
+                                      child: ListTile(
+                                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                                        leading: Stack(
+                                          clipBehavior: Clip.none,
+                                          children: [
+                                            Container(
+                                              width: 40,
+                                              height: 40,
+                                              decoration: BoxDecoration(
+                                                color: LinearTheme.surface,
+                                                borderRadius: BorderRadius.circular(10),
+                                                border: Border.all(color: LinearTheme.surfaceBorder, width: 0.8),
+                                              ),
+                                              child: Icon(
+                                                item.isRead ? Icons.mark_email_read_outlined : Icons.mark_email_unread_outlined,
+                                                color: item.isRead ? LinearTheme.textMuted : LinearTheme.accentLight,
+                                                size: 20,
+                                              ),
+                                            ),
+                                            if (!item.isRead)
+                                              Positioned(
+                                                top: -2,
+                                                right: -2,
+                                                child: Container(
+                                                  width: 9,
+                                                  height: 9,
+                                                  decoration: const BoxDecoration(
+                                                    color: LinearTheme.accent,
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                ),
+                                              ),
+                                          ],
+                                        ),
+                                        title: Text(
+                                          item.title,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            color: item.isRead ? Colors.white70 : Colors.white,
+                                            fontSize: 14,
+                                            fontWeight: item.isRead ? FontWeight.normal : FontWeight.w600,
+                                          ),
+                                        ),
+                                        subtitle: Text(
+                                          '${item.body} · ${DateFormat('dd/MM HH:mm').format(item.createdAt)}',
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(color: LinearTheme.textSecondary, fontSize: 12),
+                                        ),
+                                        onTap: () => _showNotificationDetail(context, item),
+                                      ),
+                                    );
+                                  },
+                                ),
+                        ),
+                      ],
                     );
                   },
                 ),
@@ -250,6 +283,36 @@ class InboxPage extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  /// Nút chọn lọc thông báo đơn giản
+  Widget _buildFilterTab({
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected ? LinearTheme.surfaceHighlight : LinearTheme.surface,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: isSelected ? LinearTheme.accent : LinearTheme.surfaceBorder,
+            width: 0.8,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? Colors.white : LinearTheme.textSecondary,
+            fontSize: 12,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+          ),
+        ),
+      ),
     );
   }
 }

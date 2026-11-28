@@ -38,9 +38,9 @@ class TaskModel {
     this.priority = TaskPriority.medium,
     this.assignedTo,
     this.projectId,
-    this.assignee = 'Nguyen Nhat Minh Quan',
+    this.assignee = '',
     this.labels = const [],
-    this.project = 'Lam do an flutter',
+    this.project = '',
     this.dueDate,
     DateTime? createdAt,
   }) : createdAt = createdAt ?? DateTime.now();
@@ -118,16 +118,16 @@ class TaskModel {
       }
     }
 
-    String userName = 'Nguyen Nhat Minh Quan';
+    String userName = '';
     if (json['users'] != null && json['users'] is Map) {
-      userName = json['users']['name'] ?? json['users']['email'] ?? userName;
+      userName = json['users']['full_name'] ?? json['users']['name'] ?? json['users']['email'] ?? '';
     } else if (json['assignee'] != null) {
       userName = json['assignee'].toString();
     }
 
-    String projName = 'Lam do an flutter';
+    String projName = '';
     if (json['projects'] != null && json['projects'] is Map) {
-      projName = json['projects']['name'] ?? projName;
+      projName = json['projects']['name'] ?? '';
     } else if (json['project'] != null) {
       projName = json['project'].toString();
     }
@@ -155,11 +155,12 @@ class TaskModel {
       'description': description,
       'status': status.name,
       'priority': priority.name,
+      'assignee': assignee,
     };
 
     if (code != null) map['code'] = code;
-    if (assignedTo != null) map['assigned_to'] = assignedTo;
-    if (projectId != null) map['project_id'] = projectId;
+    if (assignedTo != null && assignedTo!.isNotEmpty) map['assigned_to'] = assignedTo;
+    if (projectId != null && projectId!.isNotEmpty) map['project_id'] = projectId;
     if (dueDate != null) map['due_date'] = dueDate!.toIso8601String();
     if (labels.isNotEmpty) map['labels'] = labels;
 
