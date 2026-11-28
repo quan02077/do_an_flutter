@@ -112,6 +112,20 @@ class ProjectCard extends StatelessWidget {
                     ),
                   ),
                 ],
+                const Spacer(),
+                const Icon(Icons.person_outline, color: LinearTheme.textMuted, size: 13),
+                const SizedBox(width: 4),
+                Flexible(
+                  child: Text(
+                    project.ownerName ?? 'Admin',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: LinearTheme.textSecondary,
+                      fontSize: 11,
+                    ),
+                  ),
+                ),
               ],
             ),
           ],

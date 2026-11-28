@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../auth/state/auth_provider.dart';
+import '../../projects/state/project_provider.dart';
 import '../models/task_model.dart';
 import '../services/task_service.dart';
 
@@ -10,16 +12,34 @@ class TaskProvider extends ChangeNotifier {
 
   TaskProvider._internal() {
     _listenToTasksRealtime();
+    // Khi đổi tài khoản hoặc danh sách dự án tham gia thay đổi -> tự động lọc lại công việc
+    AuthProvider().addListener(notifyListeners);
+    ProjectProvider().addListener(notifyListeners);
   }
 
-  final List<TaskModel> _tasks = [];
+  final List<TaskModel> _allTasks = [];
 
   TaskStatus? _selectedStatusFilter;
   TaskPriority? _selectedPriorityFilter;
   String _searchQuery = '';
   DateTime _selectedCalendarDate = DateTime.now();
 
-  List<TaskModel> get tasks => List.unmodifiable(_tasks);
+  /// Chỉ hiển thị các công việc giao cho user hiện tại HOẶC thuộc dự án mà user đang tham gia
+  List<TaskModel> get tasks {
+    final userId = AuthProvider().currentUser?.id;
+    if (userId == null) return [];
+
+    final myProjectIds = ProjectProvider().projects.map((p) => p.id).toSet();
+
+    final visible = _allTasks.where((task) {
+      final isAssignedToMe = task.assignedTo == userId;
+      final isInMyProject = task.projectId != null && myProjectIds.contains(task.projectId);
+      return isAssignedToMe || isInMyProject;
+    }).toList();
+
+    return List.unmodifiable(visible);
+  }
+
   TaskStatus? get selectedStatusFilter => _selectedStatusFilter;
   TaskPriority? get selectedPriorityFilter => _selectedPriorityFilter;
   String get searchQuery => _searchQuery;
@@ -48,7 +68,7 @@ class TaskProvider extends ChangeNotifier {
   List<TaskModel> get filteredTasks {
     final query = _searchQuery.trim().toLowerCase();
 
-    return _tasks.where((task) {
+    return tasks.where((task) {
       final matchStatus = _selectedStatusFilter == null || task.status == _selectedStatusFilter;
       final matchPriority = _selectedPriorityFilter == null || task.priority == _selectedPriorityFilter;
       final matchSearch = query.isEmpty ||
@@ -61,11 +81,11 @@ class TaskProvider extends ChangeNotifier {
   }
 
   List<TaskModel> getTasksByStatus(TaskStatus status) {
-    return _tasks.where((task) => task.status == status).toList();
+    return tasks.where((task) => task.status == status).toList();
   }
 
   List<TaskModel> getTasksForDate(DateTime date) {
-    return _tasks.where((task) {
+    return tasks.where((task) {
       if (task.dueDate == null) return false;
       return task.dueDate!.year == date.year &&
           task.dueDate!.month == date.month &&
@@ -76,8 +96,8 @@ class TaskProvider extends ChangeNotifier {
   void _listenToTasksRealtime() {
     _taskService.getTasksStream().listen(
       (taskList) {
-        _tasks.clear();
-        _tasks.addAll(taskList);
+        _allTasks.clear();
+        _allTasks.addAll(taskList);
         notifyListeners();
       },
       onError: (err) {
@@ -86,14 +106,19 @@ class TaskProvider extends ChangeNotifier {
     );
   }
 
-  /// Thêm công việc (Cập nhật lạc quan ngay tức thì trên UI + Lưu vào Supabase)
+  /// Thêm công việc (Cập nhật tức thì + nhận UUID thật từ Supabase)
   Future<void> addTask(TaskModel task) async {
-    _tasks.insert(0, task);
-    notifyListeners(); // UI vẽ lại ngay lập tức!
+    _allTasks.insert(0, task);
+    notifyListeners();
     try {
-      await _taskService.createTask(task);
+      final created = await _taskService.createTask(task);
+      final idx = _allTasks.indexWhere((t) => t.id == task.id);
+      if (idx != -1) {
+        _allTasks[idx] = created;
+        notifyListeners();
+      }
     } catch (e) {
-      _tasks.removeWhere((t) => t.id == task.id);
+      _allTasks.removeWhere((t) => t.id == task.id);
       notifyListeners();
       rethrow;
     }
@@ -101,28 +126,28 @@ class TaskProvider extends ChangeNotifier {
 
   /// Sửa công việc (Cập nhật tức thì)
   Future<void> updateTask(TaskModel updatedTask) async {
-    final index = _tasks.indexWhere((t) => t.id == updatedTask.id);
+    final index = _allTasks.indexWhere((t) => t.id == updatedTask.id);
     if (index != -1) {
-      _tasks[index] = updatedTask;
-      notifyListeners(); // UI cập nhật ngay lập tức!
+      _allTasks[index] = updatedTask;
+      notifyListeners();
     }
     await _taskService.updateTask(updatedTask);
   }
 
-  /// Kéo thả đổi trạng thái công việc (Cập nhật tức thì 0 giây)
+  /// Kéo thả đổi trạng thái công việc (Cập nhật tức thì)
   Future<void> moveTask(String taskId, TaskStatus newStatus) async {
-    final index = _tasks.indexWhere((t) => t.id == taskId);
+    final index = _allTasks.indexWhere((t) => t.id == taskId);
     if (index != -1) {
-      _tasks[index] = _tasks[index].copyWith(status: newStatus);
-      notifyListeners(); // Thẻ nhảy sang cột mới ngay lập tức!
+      _allTasks[index] = _allTasks[index].copyWith(status: newStatus);
+      notifyListeners();
     }
     await _taskService.updateTaskStatus(taskId, newStatus);
   }
 
   /// Xoá công việc (Xoá tức thì khỏi màn hình)
   Future<void> deleteTask(String taskId) async {
-    _tasks.removeWhere((t) => t.id == taskId);
-    notifyListeners(); // Biến mất khỏi danh sách ngay!
+    _allTasks.removeWhere((t) => t.id == taskId);
+    notifyListeners();
     await _taskService.deleteTask(taskId);
   }
 }

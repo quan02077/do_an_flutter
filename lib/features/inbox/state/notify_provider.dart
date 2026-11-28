@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../auth/state/auth_provider.dart';
 import '../models/notify_model.dart';
 import '../services/notify_service.dart';
 
@@ -10,16 +11,27 @@ class NotifyProvider extends ChangeNotifier {
 
   NotifyProvider._internal() {
     _listenToNotificationRealTime();
+    AuthProvider().addListener(notifyListeners);
   }
 
-  final List<NotifyModel> _notifications = [];
+  final List<NotifyModel> _allNotifications = [];
   String _searchQuery = '';
 
-  List<NotifyModel> get notifications => List.unmodifiable(_notifications);
+  /// Chỉ lấy các thông báo dành riêng cho user đang đăng nhập (hoặc thông báo chung userId == null)
+  List<NotifyModel> get notifications {
+    final userId = AuthProvider().currentUser?.id;
+    if (userId == null) return [];
+
+    final visible = _allNotifications
+        .where((n) => n.userId == null || n.userId == userId)
+        .toList();
+    return List.unmodifiable(visible);
+  }
+
   String get searchQuery => _searchQuery;
 
-  int get notifyCount => _notifications.length;
-  int get unreadCount => _notifications.where((n) => !n.isRead).length;
+  int get notifyCount => notifications.length;
+  int get unreadCount => notifications.where((n) => !n.isRead).length;
 
   bool _isNotificationEnabled = true;
   bool get isNotificationEnabled => _isNotificationEnabled;
@@ -36,9 +48,9 @@ class NotifyProvider extends ChangeNotifier {
 
   List<NotifyModel> get filteredNotifications {
     final query = _searchQuery.trim().toLowerCase();
-    if (query.isEmpty) return _notifications;
+    if (query.isEmpty) return notifications;
 
-    return _notifications.where((notify) {
+    return notifications.where((notify) {
       final matchTitle = notify.title.toLowerCase().contains(query);
       final matchBody = notify.body.toLowerCase().contains(query);
       return matchTitle || matchBody;
@@ -48,8 +60,8 @@ class NotifyProvider extends ChangeNotifier {
   void _listenToNotificationRealTime() {
     _notifyService.getNotificationsStream().listen(
       (notificationList) {
-        _notifications.clear();
-        _notifications.addAll(notificationList);
+        _allNotifications.clear();
+        _allNotifications.addAll(notificationList);
         notifyListeners();
       },
       onError: (err) {
@@ -60,26 +72,32 @@ class NotifyProvider extends ChangeNotifier {
 
   /// Đánh dấu đã đọc (Cập nhật ngay tức thì)
   Future<void> markAsRead(String notificationId) async {
-    final index = _notifications.indexWhere((n) => n.id == notificationId);
+    final index = _allNotifications.indexWhere((n) => n.id == notificationId);
     if (index != -1) {
-      _notifications[index] = _notifications[index].copyWith(isRead: true);
+      _allNotifications[index] = _allNotifications[index].copyWith(isRead: true);
       notifyListeners();
     }
     await _notifyService.markAsRead(notificationId);
   }
 
-  /// Đánh dấu tất cả đã đọc (Cập nhật ngay tức thì)
+  /// Đánh dấu tất cả thông báo của user hiện tại là đã đọc
   Future<void> markAllAsRead() async {
-    for (int i = 0; i < _notifications.length; i++) {
-      _notifications[i] = _notifications[i].copyWith(isRead: true);
+    final myUnread = notifications.where((n) => !n.isRead).toList();
+    for (final item in myUnread) {
+      final idx = _allNotifications.indexWhere((n) => n.id == item.id);
+      if (idx != -1) {
+        _allNotifications[idx] = _allNotifications[idx].copyWith(isRead: true);
+      }
     }
     notifyListeners();
-    await _notifyService.markAllAsRead();
+    for (final item in myUnread) {
+      await _notifyService.markAsRead(item.id);
+    }
   }
 
   /// Xoá thông báo (Cập nhật ngay tức thì)
   Future<void> deleteNotification(String notificationId) async {
-    _notifications.removeWhere((n) => n.id == notificationId);
+    _allNotifications.removeWhere((n) => n.id == notificationId);
     notifyListeners();
     await _notifyService.deleteNotification(notificationId);
   }

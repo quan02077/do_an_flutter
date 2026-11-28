@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/task_model.dart';
 import '../state/task_provider.dart';
+import '../../auth/models/user_model.dart';
+import '../../auth/state/auth_provider.dart';
+import '../../inbox/services/notify_service.dart';
 import '../../projects/state/project_provider.dart';
 import '../../../core/theme/linear_theme.dart';
 
@@ -44,6 +47,7 @@ class _TaskDetailBottomSheetState extends State<TaskDetailBottomSheet> {
   late TextEditingController _descController;
   late TaskStatus _status;
   late TaskPriority _priority;
+  String? _assignedTo;
   late String _assignee;
   late List<String> _labels;
   late String _project;
@@ -58,9 +62,10 @@ class _TaskDetailBottomSheetState extends State<TaskDetailBottomSheet> {
     _descController = TextEditingController(text: t?.description ?? '');
     _status = t?.status ?? TaskStatus.backlog;
     _priority = t?.priority ?? TaskPriority.none;
-    _assignee = t?.assignee ?? 'Nguyen Nhat Minh Quan';
+    _assignedTo = t?.assignedTo ?? AuthProvider().currentUser?.id;
+    _assignee = t?.assignee ?? AuthProvider().displayName;
     _labels = List.from(t?.labels ?? []);
-    _project = t?.project ?? widget.initialProjectName ?? 'Linear Mobile App';
+    _project = t?.project ?? widget.initialProjectName ?? '';
     _projectId = t?.projectId ?? widget.initialProjectId;
     _dueDate = t?.dueDate;
   }
@@ -86,15 +91,18 @@ class _TaskDetailBottomSheetState extends State<TaskDetailBottomSheet> {
     }
 
     final provider = TaskProvider();
+    final currentUserId = AuthProvider().currentUser?.id;
+
     if (widget.task == null) {
-      final newId = 'LIN-${100 + provider.tasks.length + 1}';
+      final newCode = 'LIN-${100 + provider.tasks.length + 1}';
       final newTask = TaskModel(
-        id: newId,
-        code: newId,
+        id: 'temp-${DateTime.now().millisecondsSinceEpoch}',
+        code: newCode,
         title: title,
         description: _descController.text.trim(),
         status: _status,
         priority: _priority,
+        assignedTo: _assignedTo,
         assignee: _assignee,
         labels: _labels,
         project: _project,
@@ -102,12 +110,22 @@ class _TaskDetailBottomSheetState extends State<TaskDetailBottomSheet> {
         dueDate: _dueDate,
       );
       provider.addTask(newTask);
+
+      // Gửi thông báo realtime nếu giao việc cho thành viên khác
+      if (_assignedTo != null && _assignedTo != currentUserId) {
+        NotifyService().createNotification(
+          title: 'Bạn được giao công việc mới',
+          body: '${AuthProvider().displayName} đã giao "$title" cho bạn.',
+          userId: _assignedTo,
+        );
+      }
     } else {
       final updated = widget.task!.copyWith(
         title: title,
         description: _descController.text.trim(),
         status: _status,
         priority: _priority,
+        assignedTo: _assignedTo,
         assignee: _assignee,
         labels: _labels,
         project: _project,
@@ -442,12 +460,19 @@ class _TaskDetailBottomSheetState extends State<TaskDetailBottomSheet> {
   }
 
   void _showAssigneePicker() {
-    final members = [
-      'Nguyen Nhat Minh Quan',
-      'Thanh vien 1',
-      'Thanh vien 2',
-      'Thanh vien 3',
-    ];
+    // Nếu task nằm trong 1 dự án -> lấy danh sách thành viên thuộc dự án đó
+    // Nếu là task cá nhân (chưa chọn dự án) -> chỉ gán cho bản thân
+    final List<UserModel> members = (_projectId != null && _projectId!.isNotEmpty)
+        ? ProjectProvider().getUsersForProject(_projectId!)
+        : [
+            if (AuthProvider().currentUser != null)
+              UserModel(
+                id: AuthProvider().currentUser!.id,
+                email: AuthProvider().email,
+                fullname: AuthProvider().displayName,
+              ),
+          ];
+
     showModalBottomSheet(
       context: context,
       backgroundColor: const Color(0xFF16171B),
@@ -456,30 +481,51 @@ class _TaskDetailBottomSheetState extends State<TaskDetailBottomSheet> {
       ),
       builder: (ctx) {
         return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: members.map((m) {
-              return ListTile(
-                dense: true,
-                leading: CircleAvatar(
-                  radius: 12,
-                  backgroundColor: LinearTheme.accent,
-                  child: Text(
-                    m[0],
-                    style: const TextStyle(color: Colors.white, fontSize: 11),
+          child: members.isEmpty
+              ? const Padding(
+                  padding: EdgeInsets.all(24),
+                  child: Center(
+                    child: Text(
+                      'Chưa có thành viên để giao việc',
+                      style: TextStyle(color: LinearTheme.textSecondary),
+                    ),
                   ),
+                )
+              : Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: members.map((user) {
+                    final name = user.fullname.isNotEmpty
+                        ? user.fullname
+                        : user.email.split('@').first;
+                    final isSelected = _assignedTo == user.id || _assignee == name;
+                    return ListTile(
+                      dense: true,
+                      leading: CircleAvatar(
+                        radius: 12,
+                        backgroundColor: LinearTheme.accent,
+                        child: Text(
+                          name.isNotEmpty ? name[0].toUpperCase() : '?',
+                          style: const TextStyle(color: Colors.white, fontSize: 11),
+                        ),
+                      ),
+                      title: Text(name, style: const TextStyle(color: Colors.white, fontSize: 14)),
+                      subtitle: Text(
+                        user.email,
+                        style: const TextStyle(color: LinearTheme.textMuted, fontSize: 11),
+                      ),
+                      trailing: isSelected
+                          ? const Icon(Icons.check, color: LinearTheme.accent, size: 18)
+                          : null,
+                      onTap: () {
+                        setState(() {
+                          _assignedTo = user.id;
+                          _assignee = name;
+                        });
+                        Navigator.pop(ctx);
+                      },
+                    );
+                  }).toList(),
                 ),
-                title: Text(m, style: const TextStyle(color: Colors.white, fontSize: 14)),
-                trailing: _assignee == m
-                    ? const Icon(Icons.check, color: LinearTheme.accent, size: 18)
-                    : null,
-                onTap: () {
-                  setState(() => _assignee = m);
-                  Navigator.pop(ctx);
-                },
-              );
-            }).toList(),
-          ),
         );
       },
     );
@@ -546,24 +592,41 @@ class _TaskDetailBottomSheetState extends State<TaskDetailBottomSheet> {
                 )
               : Column(
                   mainAxisSize: MainAxisSize.min,
-                  children: projects.map((proj) {
-                    final isSelected = _projectId == proj.id;
-                    return ListTile(
+                  children: [
+                    ListTile(
                       dense: true,
-                      leading: const Icon(Icons.view_in_ar_rounded, color: Color(0xFFEB5757), size: 18),
-                      title: Text(proj.name, style: const TextStyle(color: Colors.white, fontSize: 14)),
-                      trailing: isSelected
+                      leading: const Icon(Icons.person_outline, color: LinearTheme.textSecondary, size: 18),
+                      title: const Text('Việc cá nhân (không thuộc dự án)', style: TextStyle(color: Colors.white, fontSize: 14)),
+                      trailing: _projectId == null
                           ? const Icon(Icons.check, color: LinearTheme.accent, size: 18)
                           : null,
                       onTap: () {
                         setState(() {
-                          _projectId = proj.id;
-                          _project = proj.name;
+                          _projectId = null;
+                          _project = '';
                         });
                         Navigator.pop(ctx);
                       },
-                    );
-                  }).toList(),
+                    ),
+                    ...projects.map((proj) {
+                      final isSelected = _projectId == proj.id;
+                      return ListTile(
+                        dense: true,
+                        leading: const Icon(Icons.view_in_ar_rounded, color: Color(0xFFEB5757), size: 18),
+                        title: Text(proj.name, style: const TextStyle(color: Colors.white, fontSize: 14)),
+                        trailing: isSelected
+                            ? const Icon(Icons.check, color: LinearTheme.accent, size: 18)
+                            : null,
+                        onTap: () {
+                          setState(() {
+                            _projectId = proj.id;
+                            _project = proj.name;
+                          });
+                          Navigator.pop(ctx);
+                        },
+                      );
+                    }),
+                  ],
                 ),
         );
       },

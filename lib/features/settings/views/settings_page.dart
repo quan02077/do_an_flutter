@@ -15,6 +15,48 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
 
+  void _showAppInfoDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF1E2025),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        title: const Text(
+          'Thông tin ứng dụng',
+          style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+        ),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Đề tài 2: Ứng dụng quản lý công việc nhóm',
+              style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
+            ),
+            SizedBox(height: 8),
+            Text(
+              '• Nền tảng: Flutter & Dart\n'
+              '• Backend: Supabase (PostgreSQL + Realtime)\n'
+              '• Tính năng: Quản lý Task, Kanban kéo thả, Lịch Deadline, Thống kê, Quản lý nhóm & Thảo luận thời gian thực.',
+              style: TextStyle(color: LinearTheme.textSecondary, fontSize: 13, height: 1.5),
+            ),
+            SizedBox(height: 12),
+            Text(
+              'Phiên bản: 1.0.0',
+              style: TextStyle(color: LinearTheme.textMuted, fontSize: 12),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Đóng', style: TextStyle(color: LinearTheme.accentLight)),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _confirmSignOut(BuildContext context) {
     showDialog(
       context: context,
@@ -165,18 +207,35 @@ class _SettingsPageState extends State<SettingsPage> {
                     SnackBar(
                       content: Text(value ? 'Đã bật nhận thông báo' : 'Đã tạm dừng thông báo'),
                       duration: const Duration(seconds: 2),
-                      backgroundColor: const Color(0xFFfcfcfc),
+                      backgroundColor: const Color(0xFF1E2025),
                     ),
                   );
                 },
               ),
             ),
 
-            const ListTile(
-              contentPadding: EdgeInsets.symmetric(horizontal: 20),
-              leading: Icon(Icons.dark_mode_outlined, color: Colors.white),
-              title: Text('Giao diện', style: TextStyle(color: Colors.white)),
-              trailing: Icon(Icons.chevron_right, color: Colors.white),
+            // Mục Thông tin đồ án
+            ListTile(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+              leading: const Icon(Icons.info_outline, color: Colors.white),
+              title: const Text('Thông tin đồ án', style: TextStyle(color: Colors.white)),
+              subtitle: const Text(
+                'Đề tài 2 • Phiên bản 1.0.0',
+                style: TextStyle(color: Colors.grey, fontSize: 12),
+              ),
+              trailing: const Icon(Icons.chevron_right, color: Colors.white),
+              onTap: () => _showAppInfoDialog(context),
+            ),
+
+            // Trạng thái kết nối server Supabase
+            ListTile(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+              leading: const Icon(Icons.cloud_done_outlined, color: Color(0xFF10B981)),
+              title: const Text('Đồng bộ máy chủ', style: TextStyle(color: Colors.white)),
+              subtitle: const Text(
+                'Supabase Cloud • Real-time đang bật',
+                style: TextStyle(color: Color(0xFF10B981), fontSize: 12),
+              ),
             ),
 
             // Nút Đăng xuất (chỉ hiện khi đã đăng nhập)

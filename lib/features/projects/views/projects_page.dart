@@ -35,6 +35,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Thanh tìm kiếm dự án
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                 child: SizedBox(
@@ -80,6 +81,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
                   ),
                 ),
               ),
+
               if (projects.isNotEmpty)
                 const Padding(
                   padding: EdgeInsets.only(left: 18, top: 14, bottom: 4),

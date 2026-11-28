@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/linear_theme.dart';
+import '../../auth/state/auth_provider.dart';
 import '../models/project_model.dart';
 import '../state/project_provider.dart';
 
@@ -60,8 +61,15 @@ class _ProjectFormSheetState extends State<ProjectFormSheet> {
         widget.project!.copyWith(name: name, description: desc),
       );
     } else {
+      final auth = AuthProvider();
       provider.addProject(
-        ProjectModel(id: '', name: name, description: desc),
+        ProjectModel(
+          id: 'temp-${DateTime.now().millisecondsSinceEpoch}',
+          name: name,
+          description: desc,
+          ownerId: auth.currentUser?.id,
+          ownerName: auth.displayName,
+        ),
       );
     }
 

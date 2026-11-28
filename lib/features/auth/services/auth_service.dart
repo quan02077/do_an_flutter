@@ -85,4 +85,21 @@ class AuthService {
       return null;
     }
   }
+
+  /// Lấy danh sách toàn bộ thành viên trong bảng users từ Supabase
+  Future<List<UserModel>> getAllUsers() async {
+    try {
+      final response = await _supabase
+          .from('users')
+          .select()
+          .order('created_at', ascending: true);
+
+      return (response as List)
+          .map((json) => UserModel.fromJson(json))
+          .toList();
+    } catch (e) {
+      debugPrint('Lỗi Backend khi lấy danh sách thành viên: $e');
+      return [];
+    }
+  }
 }
